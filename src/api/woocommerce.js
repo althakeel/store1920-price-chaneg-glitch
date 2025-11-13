@@ -5,8 +5,8 @@ const _categoryCache = {};
 const _productCache = {};
 
 export const API_BASE = "https://db.store1920.com/wp-json/wc/v3";
-export const CONSUMER_KEY = "ck_f44feff81d804619a052d7bbdded7153a1f45bdd";
-export const CONSUMER_SECRET = "cs_92458ba6ab5458347082acc6681560911a9e993d";
+export const CONSUMER_KEY = "ck_8dfeb134379e51fa95e3a22769f67bd6b4f0e507";
+export const CONSUMER_SECRET = "cs_2e5da71434cc874771a8ab0ef2dae2ffef3591c0";
 
 const authParams = `consumer_key=${CONSUMER_KEY}&consumer_secret=${CONSUMER_SECRET}`;
 

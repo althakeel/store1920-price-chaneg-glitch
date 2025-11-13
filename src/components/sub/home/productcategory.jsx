@@ -25,8 +25,8 @@ import Product6 from '../../../assets/images/staticproducts/Peeler/1.webp'
 
 
 const PAGE_SIZE = 10;
-const INITIAL_VISIBLE = 24;
-const PRODUCT_FETCH_LIMIT = 12;
+const INITIAL_VISIBLE = 20;
+const PRODUCT_FETCH_LIMIT = 8;
 const RECOMMENDED_CATEGORY_LIMIT = 8;
 const CATEGORY_PAGE_LIMIT = 4;
 const MAX_PRODUCTS = 180;
@@ -201,17 +201,30 @@ const staticProducts = [
 const staticPositions = [2,5, 11, 15, 19, 24,28, 32, 39,22,];
 
 const ProductCategory = () => {
+  // Static category list (name, id)
+  const staticCategories = [
+    { name: 'Recommended', id: 29688 },
+    { name: 'Electronics & Smart', id: 498 },
+    { name: 'Beauty & Personal Care', id: 6526 },
+    { name: 'Baby, Kids & Maternity', id: 6528 },
+    { name: 'Automotive & Motorcycle', id: 6531 },
+    { name: 'Women’s Clothing', id: 6523 },
+    { name: 'Shoes & Footwear', id: 6527 },
+    { name: 'Pet Supplies', id: 6533 },
+    { name: 'Men’s Clothing', id: 6522 },
+    { name: 'Lingerie & Loungewear', id: 6524 },
+    { name: 'Home Improvement & Tools', id: 6520 },
+    { name: 'Home Appliances', id: 6519 },
+    { name: 'Electronics & Smart Devices', id: 498 },
+  ];
   const { addToCart, cartItems } = useCart();
   const location = useLocation();
   const navigate = useNavigate();
   const isHomePage = location.pathname === "/";
 
-  const [categories, setCategories] = useState([]);
-  const [categoriesPage, setCategoriesPage] = useState(1);
-  const [hasMoreCategories, setHasMoreCategories] = useState(true);
-  const [loadingCategories, setLoadingCategories] = useState(false);
+  // Static category list will be used below
 
-  const [selectedCategoryId, setSelectedCategoryId] = useState("all");
+  const [selectedCategoryId, setSelectedCategoryId] = useState("29688");
   const DAILY_USE_ID = "daily-use";
   const [badgeText, setBadgeText] = useState("MEGA OFFER");
   const [animate, setAnimate] = useState(true);
@@ -224,29 +237,26 @@ const ProductCategory = () => {
   const [allProducts, setAllProducts] = useState([]); // fetched products
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE);
   const [loadingProducts, setLoadingProducts] = useState(false);
-  const hasMoreProducts = visibleCount < allProducts.length;
+  const [apiLoaded, setApiLoaded] = useState(false); // for recommended: has user loaded API products?
+  // For 'Recommended', hasMoreProducts should consider both API and static products
+  const getTotalProducts = () => {
+    if (selectedCategoryId === "29688") {
+      if (apiLoaded) {
+        return allProducts.length + staticProducts.length;
+      } else {
+        return staticProducts.length;
+      }
+    }
+    return allProducts.length;
+  };
+  const hasMoreProducts = visibleCount < getTotalProducts();
 
 
   const [categoryProducts, setCategoryProducts] = useState([]); // products for selected category
 const [categoryPage, setCategoryPage] = useState(1);
 const [categoryHasMore, setCategoryHasMore] = useState(true);
 
-  // Fetch categories
-  const fetchCategories = useCallback(async (page = 1) => {
-    setLoadingCategories(true);
-    try {
-      const res = await fetch(
-        `${API_BASE}/products/categories?consumer_key=${CONSUMER_KEY}&consumer_secret=${CONSUMER_SECRET}&per_page=${PAGE_SIZE}&page=${page}&orderby=name`
-      );
-      const data = await res.json();
-      setCategories(prev => (page === 1 ? data : [...prev, ...data]));
-      setHasMoreCategories(data.length === PAGE_SIZE);
-    } catch {
-      setHasMoreCategories(false);
-    } finally {
-      setLoadingCategories(false);
-    }
-  }, []);
+  // No need to fetch categories from API
 
   // Badge animation
   useEffect(() => {
@@ -264,32 +274,28 @@ const [categoryHasMore, setCategoryHasMore] = useState(true);
   }, []);
 
   // Fetch products
+  // Fetch only id and images for initial grid
   const fetchProducts = useCallback(async (categoryId) => {
     setVisibleCount(INITIAL_VISIBLE);
     setAllProducts([]);
     setLoadingProducts(true);
     try {
       let fetchedProducts = [];
-
-      // Always fetch only daily use products for both 'Recommended' and 'Daily Use'
-      if (categoryId === DAILY_USE_ID || categoryId === "all") {
-        const res = await fetch('https://db.store1920.com/wp-json/custom/v1/daily-use-products');
+      let page = 1;
+      while (page <= CATEGORY_PAGE_LIMIT && fetchedProducts.length < MAX_PRODUCTS) {
+        const res = await fetch(
+          `${API_BASE}/products?consumer_key=${CONSUMER_KEY}&consumer_secret=${CONSUMER_SECRET}&per_page=${PRODUCT_FETCH_LIMIT}&page=${page}&category=${categoryId}&_fields=id,images,categories,slug`
+        );
         const data = await res.json();
-        fetchedProducts = Array.isArray(data) ? data : [];
-      } else {
-        let page = 1;
-        while (page <= CATEGORY_PAGE_LIMIT && fetchedProducts.length < MAX_PRODUCTS) {
-          const res = await fetch(
-            `${API_BASE}/products?consumer_key=${CONSUMER_KEY}&consumer_secret=${CONSUMER_SECRET}&per_page=${PRODUCT_FETCH_LIMIT}&page=${page}&category=${categoryId}&_fields=id,slug,name,images,price,regular_price,sale_price`
-          );
-          const data = await res.json();
-          if (!Array.isArray(data) || !data.length) break;
+        if (!Array.isArray(data) || !data.length) break;
+        if (String(categoryId) === "29688") {
+          fetchedProducts.push(...data.filter(p => Array.isArray(p.categories) && p.categories.some(cat => String(cat.id) === "29688")));
+        } else {
           fetchedProducts.push(...data);
-          page++;
         }
-        fetchedProducts = fetchedProducts.slice(0, MAX_PRODUCTS);
+        page++;
       }
-
+      fetchedProducts = fetchedProducts.slice(0, MAX_PRODUCTS);
       if (fetchedProducts.length > 0) {
         setAllProducts(shuffleArray(fetchedProducts));
       } else {
@@ -305,8 +311,23 @@ const [categoryHasMore, setCategoryHasMore] = useState(true);
 
   // Initial fetch
   useEffect(() => {
-    fetchProducts(selectedCategoryId);
+    setVisibleCount(INITIAL_VISIBLE);
+    if (selectedCategoryId !== "29688") {
+      fetchProducts(selectedCategoryId);
+      setApiLoaded(true);
+    } else {
+      setAllProducts([]);
+      setApiLoaded(false);
+    }
   }, [selectedCategoryId, fetchProducts]);
+
+  // Handler to load API products for Recommended
+  const handleLoadApiProducts = async () => {
+    setLoadingProducts(true);
+    await fetchProducts("29688");
+    setApiLoaded(true);
+    setLoadingProducts(false);
+  };
 
   // Arrow visibility for categories scroll
   const updateArrowVisibility = useCallback(() => {
@@ -323,11 +344,11 @@ const [categoryHasMore, setCategoryHasMore] = useState(true);
     el.addEventListener("scroll", throttled);
     updateArrowVisibility();
     return () => el.removeEventListener("scroll", throttled);
-  }, [categories, updateArrowVisibility]);
+  }, [updateArrowVisibility]);
 
   // Load more products
   const loadMoreProducts = () => {
-    setVisibleCount(prev => Math.min(prev + INITIAL_VISIBLE, allProducts.length));
+    setVisibleCount(prev => Math.min(prev + INITIAL_VISIBLE, getTotalProducts()));
   };
 
   // Fly to cart animation
@@ -359,13 +380,33 @@ const [categoryHasMore, setCategoryHasMore] = useState(true);
     setTimeout(() => clone.remove(), 800);
   };
 
-const handleProductClick = (product) => {
+// Fetch full product details on click for API products
+const [loadingProductId, setLoadingProductId] = useState(null);
+const [productDetails, setProductDetails] = useState({});
+const handleProductClick = async (product) => {
   if (product.isStatic) {
     navigate(product.path || `/products/${product.slug}`);
-  } else {
-    navigate(`/product/${product.slug}`);
+    window.scrollTo(0, 0);
+    return;
   }
-  window.scrollTo(0, 0);
+  // If already have details, go to product page
+  if (productDetails[product.id]) {
+    navigate(`/product/${product.slug}`);
+    window.scrollTo(0, 0);
+    return;
+  }
+  setLoadingProductId(product.id);
+  try {
+    const res = await fetch(`${API_BASE}/products/${product.id}?consumer_key=${CONSUMER_KEY}&consumer_secret=${CONSUMER_SECRET}`);
+    const data = await res.json();
+    setProductDetails(prev => ({ ...prev, [product.id]: data }));
+    navigate(`/product/${product.slug}`);
+    window.scrollTo(0, 0);
+  } catch (err) {
+    alert('Failed to load product details.');
+  } finally {
+    setLoadingProductId(null);
+  }
 };
 
 const getMergedProducts = () => {
@@ -381,21 +422,34 @@ const getMergedProducts = () => {
 
 
   
-  const selectedCategory = categories.find(c => c.id === selectedCategoryId);
-  const showMegaOffer = selectedCategory?.enable_offer;
+  const selectedCategory = staticCategories.find(c => String(c.id) === String(selectedCategoryId));
+  const showMegaOffer = false; // No dynamic offer badge for static categories
 
-// Progressive product card rendering: show only image+name first, then rest after 0.5s
-const [showFullProductCards, setShowFullProductCards] = useState(false);
 
+// Progressive product card rendering: show only first product fully, then rest after a short delay
+const [showFull, setShowFull] = useState([true, ...Array(INITIAL_VISIBLE - 1).fill(false)]);
 useEffect(() => {
-  setShowFullProductCards(false);
-  const timer = setTimeout(() => setShowFullProductCards(true), 500);
-  return () => clearTimeout(timer);
+  setShowFull([true, ...Array(visibleCount - 1).fill(false)]);
+  let timeouts = [];
+  for (let i = 1; i < visibleCount; ++i) {
+    timeouts.push(setTimeout(() => {
+      setShowFull(prev => {
+        const next = [...prev];
+        next[i] = true;
+        return next;
+      });
+    }, 200 + i * 30));
+  }
+  return () => timeouts.forEach(clearTimeout);
 }, [allProducts, visibleCount, selectedCategoryId]);
 
-const renderProducts = () => {
-  const productsToShow = selectedCategoryId === "all" ? getMergedProducts() : allProducts;
-  return productsToShow.slice(0, visibleCount).map((p, index) => {
+const renderProducts = (productsToShowParam) => {
+  // Accept productsToShow as a parameter for instant rendering
+  let productsToShow = productsToShowParam;
+  // Ensure visibleCount does not exceed productsToShow length
+  const count = Math.min(visibleCount, productsToShow.length);
+  return productsToShow.slice(0, count).map((p, index) => {
+    const hasSale = p.sale_price && p.sale_price !== p.regular_price;
     // Static product card
     if (p.isStatic) {
       return (
@@ -406,7 +460,7 @@ const renderProducts = () => {
           </div>
           <div className="pcus-prd-info12">
             <h2 className="pcus-prd-title1">{decodeHTML(p.name)}</h2>
-            {showFullProductCards && (
+            {showFull[index] && (
               <>
                 <div className="pcus-prd-dummy-reviews" style={{ display: "flex", alignItems: "center", margin: "0px 5px" }}>
                   <div style={{ color: "#FFD700", marginRight: "8px" }}>{"★".repeat(p.rating)}{"☆".repeat(5 - p.rating)}</div>
@@ -432,63 +486,17 @@ const renderProducts = () => {
         </div>
       );
     }
-
-    // Regular product card
-    const hasSale = p.sale_price && p.sale_price !== p.regular_price;
+    // Regular product card (no new badges)
     return (
-      <div key={p.id} className="pcus-prd-card" onClick={() => handleProductClick(p)} style={{ cursor: "pointer" }}>
+      <div key={p.id} className="pcus-prd-card" onClick={() => handleProductClick(p)} style={{ cursor: "pointer", position: "relative" }}>
         <div className="pcus-image-wrapper1">
-          <img src={p.images?.[0]?.src || PlaceholderImage} alt={decodeHTML(p.name)} className="pcus-prd-image1 primary-img" loading="lazy" decoding="async" />
-          {showFullProductCards && (
-            <>
-              {p.images?.[1] ? (
-                <img src={p.images[1].src} alt={decodeHTML(p.name)} className="pcus-prd-image1 secondary-img" loading="lazy" decoding="async" />
-              ) : (
-                <img src={PlaceholderImage} alt={decodeHTML(p.name)} className="pcus-prd-image1 secondary-img" />
-              )}
-              {hasSale && <span className="pcus-prd-discount-box1">-{Math.round(((parseFloat(p.regular_price) - parseFloat(p.sale_price)) / parseFloat(p.regular_price)) * 100)}% OFF</span>}
-              {showMegaOffer && index === 0 && (
-                <div className="mega-offer-badge">
-                  <span className="mega-offer-text" style={{ transform: animate ? "translateY(0)" : "translateY(100%)", opacity: animate ? 1 : 0, display: "inline-block" }}>{badgeText}</span>
-                </div>
-              )}
-            </>
-          )}
+          <img src={p.images?.[0]?.src || PlaceholderImage} alt={decodeHTML(p.name || p.slug)} className="pcus-prd-image1 primary-img" loading={index === 0 ? "eager" : "lazy"} decoding="auto" />
         </div>
-
         <div className="pcus-prd-info12">
-          <h2 className="pcus-prd-title1">{decodeHTML(p.name)}</h2>
-          {showFullProductCards && (
-            <>
-              <ProductCardReviews productId={p.id} />
-              <div style={{ height: "1px", width: "100%", backgroundColor: "lightgrey", margin: "0px 0 2px 0", borderRadius: "1px" }} />
-              <div className="pcus-prd-price-cart1">
-                <div className="pcus-prd-prices1">
-                  <img src={IconAED} alt="AED" style={{ width: "auto", height: "12px", marginRight: "0px", verticalAlign: "middle" }} />
-                  {hasSale ? (
-                    <>
-                      <Price value={p.sale_price} className="pcus-prd-sale-price12" />
-                      <Price value={p.regular_price} className="pcus-prd-regular-price12" />
-                    </>
-                  ) : (
-                    <Price value={p.price} className="price1" />
-                  )}
-                </div>
-                <button
-                  className={`pcus-prd-add-cart-btn ${cartItems.some((item) => item.id === p.id) ? "added-to-cart" : ""}`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    flyToCart(e, p.images?.[0]?.src);
-                    addToCart(p, true);
-                  }}
-                  aria-label={`Add ${decodeHTML(p.name)} to cart`}
-                >
-                  <img src={cartItems.some((item) => item.id === p.id) ? AddedToCartIcon : AddCarticon} alt="cart icon" className="pcus-prd-add-cart-icon-img" />
-                </button>
-                <div id="cart-icon" ref={cartIconRef} style={{ position: "fixed", top: 20, right: 20, zIndex: 1000, cursor: "pointer" }} />
-              </div>
-            </>
-          )}
+          <h2 className="pcus-prd-title1">{decodeHTML(p.name || p.slug)}</h2>
+          {loadingProductId === p.id ? (
+            <div style={{ color: '#ff6207', fontSize: '13px', margin: '8px 0' }}>Loading details...</div>
+          ) : null}
         </div>
       </div>
     );
@@ -498,10 +506,7 @@ useEffect(() => {
   window.scrollTo(0, 0);
 }, []);
 
-  // Add this useEffect to fetch categories initially
-useEffect(() => {
-  fetchCategories(1);
-}, [fetchCategories]);
+  // No need to fetch categories on mount
 
   return (
     <div className="pcus-wrapper3" style={{ display: "flex" }}>
@@ -515,43 +520,76 @@ useEffect(() => {
         <div className="pcus-categories-wrapper1 pcus-categories-wrapper3">
           {canScrollLeft && <button className="pcus-arrow-btn" onClick={() => categoriesRef.current.scrollBy({ left: -200, behavior: "smooth" })}>‹</button>}
           <div className="pcus-categories-scroll" ref={categoriesRef}>
-            <button className={`pcus-category-btn ${selectedCategoryId === "all" ? "active" : ""}`} onClick={() => setSelectedCategoryId("all")}>Recommended</button>
-            <button className={`pcus-category-btn ${selectedCategoryId === DAILY_USE_ID ? "active" : ""}`} onClick={() => setSelectedCategoryId(DAILY_USE_ID)}>Daily Use</button>
-            {categories.map((cat) => (
-              <button key={cat.id} className={`pcus-category-btn ${selectedCategoryId === cat.id ? "active" : ""}`} onClick={() => setSelectedCategoryId(cat.id)} title={decodeHTML(cat.name)}>
-                {decodeHTML(cat.name)}
+            {staticCategories.map((cat) => (
+              <button key={cat.id} className={`pcus-category-btn ${selectedCategoryId === String(cat.id) ? "active" : ""}`} onClick={() => setSelectedCategoryId(String(cat.id))} title={cat.name}>
+                {cat.name}
               </button>
             ))}
-            {hasMoreCategories && (
-              <button
-                className="pcus-category-btn load-more"
-                disabled={loadingCategories}
-                onClick={() => {
-                  if (!loadingCategories) {
-                    fetchCategories(categoriesPage + 1);
-                    setCategoriesPage((p) => p + 1);
-                  }
-                }}
-              >
-                {loadingCategories ? "Loading…" : "Load More"}
-              </button>
-            )}
           </div>
           {canScrollRight && <button className="pcus-arrow-btn" onClick={() => categoriesRef.current.scrollBy({ left: 200, behavior: "smooth" })}>›</button>}
         </div>
 
         {/* Products */}
-        {loadingProducts ? (
-          <div className="pcus-prd-grid001">
-            {Array(10).fill(0).map((_, idx) => <SkeletonCard key={idx} />)}
-          </div>
-        ) : allProducts.length === 0 ? (
-          <div className="pcus-no-products" style={{ minHeight: "300px", textAlign: "center", paddingTop: "40px", fontSize: "18px", color: "#666" }}>
-            No products found.
-          </div>
-        ) : (
-          <div className="pcus-prd-grid001">{renderProducts()}</div>
-        )}
+        {(() => {
+          // For 'Recommended', show only static products instantly, load API products on demand
+          let productsToShow = [];
+          if (selectedCategoryId === "29688") {
+            if (!apiLoaded) {
+              // Show only static products instantly
+              productsToShow = staticProducts.map((p) => ({ ...p, isStatic: true }));
+            } else if (loadingProducts) {
+              // Show skeletons while loading API products
+              return (
+                <div className="pcus-prd-grid001">
+                  {Array(10).fill(0).map((_, idx) => <SkeletonCard key={idx} />)}
+                </div>
+              );
+            } else {
+              // Show merged API + static products
+              productsToShow = getMergedProducts();
+            }
+          } else {
+            if (loadingProducts) {
+              // Show skeletons for non-Recommended categories
+              return (
+                <div className="pcus-prd-grid001">
+                  {Array(10).fill(0).map((_, idx) => <SkeletonCard key={idx} />)}
+                </div>
+              );
+            }
+            productsToShow = allProducts;
+          }
+          if (productsToShow.length === 0) {
+            return (
+              <div className="pcus-no-products" style={{ minHeight: "300px", textAlign: "center", paddingTop: "40px", fontSize: "18px", color: "#666" }}>
+                No products found.
+              </div>
+            );
+          }
+          return <>
+            <div className="pcus-prd-grid001">{renderProducts(productsToShow)}</div>
+            {/* Show More button for Recommended */}
+            {selectedCategoryId === "29688" && !apiLoaded && (
+              <div style={{ textAlign: "center", margin: "24px 0" }}>
+                <button
+                  className="pcus-load-more-btn"
+                  onClick={handleLoadApiProducts}
+                  style={{
+                    padding: "10px 20px",
+                    fontSize: "14px",
+                    backgroundColor: "#ff6207ff",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: "50px",
+                    cursor: "pointer"
+                  }}
+                >
+                  Show More Products
+                </button>
+              </div>
+            )}
+          </>;
+        })()}
 
         {/* Load More */}
         <div className="pcus-load-more-wrapper" style={{ textAlign: "center", margin: "24px 0" }}>

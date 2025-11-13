@@ -276,6 +276,14 @@ useEffect(() => {
   const createOrder = async () => {
     const shipping = formData.shipping;
     const billing = formData.billingSameAsShipping ? shipping : formData.billing;
+
+    // Compose full phone number for backend
+    const getFullPhone = (data) => {
+      // Always use +971 as country code, then prefix, then number
+      const prefix = data.phone_prefix || '50';
+      const number = data.phone_number || '';
+      return `+971${prefix}${number}`;
+    };
     const line_items = cartItems.map(i => ({ product_id: i.id, quantity: i.quantity }));
     const userId = user?.id;
 
@@ -310,7 +318,7 @@ useEffect(() => {
         state: billing.state,
         postcode: billing.postal_code,
         country: billing.country,
-        phone: billing.phone_number,
+        phone: getFullPhone(billing),
         email: billing.email,
         floor: sanitizeField(billing.floor),
       },
@@ -323,7 +331,7 @@ useEffect(() => {
         state: shipping.state,
         postcode: shipping.postal_code,
         country: shipping.country,
-        phone: shipping.phone_number,
+        phone: getFullPhone(shipping),
         email: shipping.email,
         floor: sanitizeField(shipping.floor),
       },

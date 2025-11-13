@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { getProductReviewsWoo } from '../../data/wooReviews'; // adjust path
 
-export default function ProductCardReviews({ productId, soldCount = 0 }) {
+export default function ProductCardReviews({ productId, soldCount = 0, hideLoading = false }) {
   const [reviews, setReviews] = useState([]);
   const [averageRating, setAverageRating] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -68,6 +68,7 @@ export default function ProductCardReviews({ productId, soldCount = 0 }) {
     return stars;
   };
 
+  if (loading && hideLoading) return null;
   if (loading) return <div>Loading reviews...</div>;
 
   return (

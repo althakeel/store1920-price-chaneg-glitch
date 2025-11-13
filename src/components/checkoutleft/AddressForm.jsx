@@ -106,7 +106,8 @@ const AddressForm = ({ formData, onChange, onSubmit, onClose, saving, error, car
         break;
       case 'phone_number':
         if (!value || value.trim() === '') return 'Phone number is required';
-        if (value.length < 12) return 'Invalid phone number';
+        // Accept exactly 7 digits for the phone number field
+        if (!/^[0-9]{7}$/.test(value)) return 'Invalid phone number';
         break;
       case 'email':
         if (!value || !/\S+@\S+\.\S+/.test(value)) return 'Invalid email';

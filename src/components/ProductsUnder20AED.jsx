@@ -94,6 +94,17 @@ const ProductsUnder20AED = () => {
           {(loading && products.length === 0
             ? Array.from({ length: 8 }).map((_, i) => <div key={i} className="pu20-card pu20-skeleton" />)
             : products
+                .filter(
+                  (p) =>
+                    p.id &&
+                    p.images &&
+                    Array.isArray(p.images) &&
+                    p.images[0] &&
+                    p.images[0].src &&
+                    p.images[0].src.trim() !== '' &&
+                    p.price &&
+                    parseFloat(p.price) > 0
+                )
           ).map((p) => {
             if (p.id) {
               return (
@@ -108,7 +119,7 @@ const ProductsUnder20AED = () => {
                   <div className="pu20-image-wrapper">
                     {!loadedImages[p.id] && <div className="pu20-image-skeleton" />}
                     <img
-                       src={p.images?.[0]?.src || PlaceholderImage}
+                      src={p.images?.[0]?.src || PlaceholderImage}
                       alt={decodeHTML(p.name)}
                       className={`pu20-image primary ${loadedImages[p.id] ? 'visible' : 'hidden'}`}
                       loading="lazy"

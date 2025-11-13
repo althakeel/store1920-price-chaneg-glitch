@@ -9,11 +9,11 @@ import Adsicon from '../assets/images/summer-saving-coloured.png';
 import IconAED from '../assets/images/Dirham 2.png';
 import ProductCardReviews from '../components/temp/productcardreviews';
 
-import { getProductsByTagSlugs, getFirstVariation, getCurrencySymbol } from '../api/woocommerce';
+import { getProductsByCategory, getFirstVariation, getCurrencySymbol } from '../api/woocommerce';
 
 const PRODUCTS_PER_PAGE = 24;
 const TITLE_LIMIT = 35;
-const NEW_TAG_SLUG = 'new-arrival'; // You will handle PHP side for this tag
+const NEW_CATEGORY_ID = 29687; // WooCommerce 'new' category ID
 
 // ===================== Utility functions =====================
 const decodeHTML = (html) => {
@@ -35,52 +35,6 @@ const SkeletonCard = () => (
   </div>
 );
 
-// ===================== Main Component =====================
-const New = () => {
-  const navigate = useNavigate();
-  const { addToCart, cartItems } = useCart();
-  const cartIconRef = useRef(null);
-
-  const [products, setProducts] = useState([]);
-  const [variationPrices, setVariationPrices] = useState({});
-  const [loadingProducts, setLoadingProducts] = useState(false);
-  const [currencySymbol, setCurrencySymbol] = useState('AED');
-  const [productsPage, setProductsPage] = useState(1);
-  const [hasMoreProducts, setHasMoreProducts] = useState(true);
-
-  const [badgeText, setBadgeText] = useState("HURRY UP");
-const [animateBadge, setAnimateBadge] = useState(true);
-
-
-  // ===================== Fetch currency =====================
-  useEffect(() => {
-    const fetchCurrency = async () => {
-      try {
-        const symbol = await getCurrencySymbol();
-        setCurrencySymbol(symbol || 'AED');
-      } catch (error) {
-        console.error('Failed to fetch currency symbol:', error);
-        setCurrencySymbol('AED');
-      }
-    };
-    fetchCurrency();
-  }, []);
-
-//======================Hurry up ======================//
-useEffect(() => {
-  const texts = ["HURRY UP", "MEGA OFFER"];
-  let idx = 0;
-  const interval = setInterval(() => {
-    setAnimateBadge(false);
-    setTimeout(() => {
-      idx = (idx + 1) % texts.length;
-      setBadgeText(texts[idx]);
-      setAnimateBadge(true);
-    }, 500);
-  }, 5000);
-  return () => clearInterval(interval);
-}, []);
-
 const shuffleArray = (array) => {
   const arr = [...array];
   for (let i = arr.length - 1; i > 0; i--) {
@@ -90,27 +44,35 @@ const shuffleArray = (array) => {
   return arr;
 };
 
-  // ===================== Fetch products =====================
-const fetchProducts = useCallback(async (page = 1) => {
-  setLoadingProducts(true);
-  try {
-    const data = await getProductsByTagSlugs([NEW_TAG_SLUG], page, PRODUCTS_PER_PAGE);
-    const validData = Array.isArray(data) ? data : [];
+const New = () => {
+  const navigate = useNavigate();
+  const { addToCart, cartItems } = useCart();
+  const cartIconRef = useRef(null);
 
-    // Always shuffle the products
-    const shuffledData = shuffleArray(validData);
+  const [products, setProducts] = useState([]);
+  const [variationPrices, setVariationPrices] = useState({});
+  const [loadingProducts, setLoadingProducts] = useState(false);
+  const [productsPage, setProductsPage] = useState(1);
+  const [hasMoreProducts, setHasMoreProducts] = useState(true);
+  const [badgeText, setBadgeText] = useState("HURRY UP");
+  const [animateBadge, setAnimateBadge] = useState(true);
 
-    setProducts(prev => page === 1 ? shuffledData : shuffleArray([...prev, ...shuffledData]));
-    setHasMoreProducts(validData.length >= PRODUCTS_PER_PAGE);
-  } catch (error) {
-    console.error('Error fetching products:', error);
-    setProducts([]);
-    setHasMoreProducts(false);
-  } finally {
-    setLoadingProducts(false);
-  }
-}, []);
-
+  // Fetch products from 'new' category only
+  const fetchProducts = useCallback(async (page = 1) => {
+    setLoadingProducts(true);
+    try {
+      const data = await getProductsByCategory(NEW_CATEGORY_ID, page, PRODUCTS_PER_PAGE);
+      const validData = Array.isArray(data) ? data : [];
+      setProducts(prev => page === 1 ? validData : [...prev, ...validData]);
+      setHasMoreProducts(validData.length >= PRODUCTS_PER_PAGE);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      setProducts([]);
+      setHasMoreProducts(false);
+    } finally {
+      setLoadingProducts(false);
+    }
+  }, []);
 
   useEffect(() => {
     fetchProducts(1);
@@ -124,7 +86,7 @@ const fetchProducts = useCallback(async (page = 1) => {
     fetchProducts(nextPage);
   };
 
-  // ===================== Handle product click =====================
+  // Handle product click
   const onProductClick = useCallback((slug, id) => {
     let recent = JSON.parse(localStorage.getItem('recentProducts')) || [];
     recent = recent.filter((rid) => rid !== id);
@@ -134,7 +96,7 @@ const fetchProducts = useCallback(async (page = 1) => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
-  // ===================== Fetch first variation prices =====================
+  // Fetch first variation prices
   useEffect(() => {
     if (!products || products.length === 0) return;
     products.forEach((p) => {
@@ -160,13 +122,11 @@ const fetchProducts = useCallback(async (page = 1) => {
     }
   };
 
-  // ===================== Fly to cart animation =====================
+  // Fly to cart animation
   const flyToCart = (e, imgSrc) => {
     if (!cartIconRef.current || !imgSrc) return;
-
     const cartRect = cartIconRef.current.getBoundingClientRect();
     const startRect = e.currentTarget.getBoundingClientRect();
-
     const clone = document.createElement('img');
     clone.src = imgSrc;
     Object.assign(clone.style, {
@@ -181,18 +141,30 @@ const fetchProducts = useCallback(async (page = 1) => {
       pointerEvents: 'none',
     });
     document.body.appendChild(clone);
-
     requestAnimationFrame(() => {
       clone.style.top = `${cartRect.top}px`;
       clone.style.left = `${cartRect.left}px`;
       clone.style.opacity = '0';
       clone.style.transform = 'scale(0.2)';
     });
-
     setTimeout(() => clone.remove(), 800);
   };
 
-  // ===================== Render =====================
+  // Animate badge text
+  useEffect(() => {
+    const texts = ["HURRY UP", "MEGA OFFER"];
+    let idx = 0;
+    const interval = setInterval(() => {
+      setAnimateBadge(false);
+      setTimeout(() => {
+        idx = (idx + 1) % texts.length;
+        setBadgeText(texts[idx]);
+        setAnimateBadge(true);
+      }, 500);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div className="pcus-wrapper12" style={{ display: 'flex' }}>
       <div className="pcus-categories-products1" style={{ width: '100%', transition: 'width 0.3s ease' }}>
@@ -234,7 +206,10 @@ const fetchProducts = useCallback(async (page = 1) => {
       onKeyDown={(e) => e.key === 'Enter' && onProductClick(p.slug)}
       style={{ position: 'relative' }}
     >
+
       <div className="new-product-badge">NEW</div>
+
+
 
       {/* Badge only if enable_offer is true */}
       {p.enable_offer && animateBadge && (
@@ -242,6 +217,8 @@ const fetchProducts = useCallback(async (page = 1) => {
           <span className="mega-offer-text">{badgeText}</span>
         </div>
       )}
+
+      {/* Removed 'Just Dropped!' badge */}
 
       <div className="pcus-image-wrapper1">
         <img src={p.images?.[0]?.src || ''} alt={decodeHTML(p.name)} className="pcus-prd-image1 primary-img" loading="lazy" decoding="async" />
