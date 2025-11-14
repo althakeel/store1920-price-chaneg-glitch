@@ -50,18 +50,52 @@ const TrackDeepOrder = () => {
     setWpOrderData(null);
     
     try {
-      // Fetch C3X tracking data
-      const trackingResponse = await fetch(
-        "https://db.store1920.com/wp-json/custom/v1/track-c3x-reference",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ TrackingAWB: orderId.trim() }),
-        }
-      );
+      // Use test data if enabled
+      let trackingData = null;
       
-      if (!trackingResponse.ok) throw new Error("C3X API error");
-      const trackingData = await trackingResponse.json();
+      if (USE_TEST_DATA) {
+        console.log("Using test tracking data...");
+        // Simulate test tracking data
+        trackingData = {
+          AirwayBillTrackList: [{
+            AirWayBillNo: orderId.trim(),
+            ShipmentProgress: "75",
+            TrackingLogDetails: [
+              {
+                Date: new Date().toISOString(),
+                Time: "10:30 AM",
+                Status: "Out for Delivery",
+                Location: "Dubai Distribution Center"
+              },
+              {
+                Date: new Date(Date.now() - 86400000).toISOString(),
+                Time: "02:15 PM",
+                Status: "With Courier",
+                Location: "Main Sorting Facility"
+              },
+              {
+                Date: new Date(Date.now() - 172800000).toISOString(),
+                Time: "09:00 AM",
+                Status: "Picked Up",
+                Location: "Store1920 Warehouse"
+              }
+            ]
+          }]
+        };
+      } else {
+        // Fetch C3X tracking data from API
+        const trackingResponse = await fetch(
+          "https://db.store1920.com/wp-json/custom/v1/track-c3x-reference",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ TrackingAWB: orderId.trim() }),
+          }
+        );
+        
+        if (!trackingResponse.ok) throw new Error("C3X API error");
+        trackingData = await trackingResponse.json();
+      }
       
       if (trackingData?.AirwayBillTrackList?.length) {
         const trackingInfo = trackingData.AirwayBillTrackList[0];
