@@ -214,6 +214,8 @@ const staticPositions = [2,5, 11, 15, 19, 24,28, 32, 39,22,];
 const apiProductCache = {};
 // Track clicked products to prioritize them
 const clickedProductIds = new Set();
+// Track which categories are currently loading to prevent duplicate fetches
+const loadingCategories = new Set();
 
 const ProductCategory = () => {
   // Static category list (name, id)
@@ -291,6 +293,13 @@ const [categoryHasMore, setCategoryHasMore] = useState(true);
   // Stage 2: Fetch remaining products in background
   const fetchProducts = useCallback(async (categoryId) => {
     console.log('🔍 Fetching products for category ID:', categoryId);
+    
+    // Prevent duplicate loading for same category
+    if (loadingCategories.has(categoryId)) {
+      console.log('⏳ Already loading this category, skipping...');
+      return;
+    }
+    
     setVisibleCount(INITIAL_VISIBLE);
     setLoadingProducts(true);
     setInitialLoadComplete(false); // Reset initial load state
@@ -311,6 +320,9 @@ const [categoryHasMore, setCategoryHasMore] = useState(true);
       setInitialLoadComplete(true); // Mark as complete
       return;
     }
+    
+    // Mark this category as loading
+    loadingCategories.add(categoryId);
     
     // Show static products instantly while API loads
     setAllProducts([]);
@@ -389,6 +401,9 @@ const [categoryHasMore, setCategoryHasMore] = useState(true);
             console.log('🎯 Background loading complete:', apiProductCache[categoryId]?.length || 0);
           } catch (bgErr) {
             console.error('❌ Background fetch error:', bgErr);
+          } finally {
+            // Remove from loading set when done
+            loadingCategories.delete(categoryId);
           }
         }, 100);
       } else {
@@ -397,12 +412,14 @@ const [categoryHasMore, setCategoryHasMore] = useState(true);
         setAllProducts([]);
         setLoadingProducts(false);
         setShowingStaticOnly(false);
+        loadingCategories.delete(categoryId); // Remove from loading
       }
     } catch (err) {
       console.error('❌ Error fetching products:', err);
       setAllProducts([]);
       setLoadingProducts(false);
       setShowingStaticOnly(false);
+      loadingCategories.delete(categoryId); // Remove from loading on error
     }
   }, []);
 
