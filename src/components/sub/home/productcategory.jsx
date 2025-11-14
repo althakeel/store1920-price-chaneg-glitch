@@ -564,22 +564,22 @@ const getMergedProducts = () => {
   const showMegaOffer = false; // No dynamic offer badge for static categories
 
 
-// Progressive product card rendering: show only first product fully, then rest after a short delay
-const [showFull, setShowFull] = useState([true, ...Array(INITIAL_VISIBLE - 1).fill(false)]);
-useEffect(() => {
-  setShowFull([true, ...Array(visibleCount - 1).fill(false)]);
-  let timeouts = [];
-  for (let i = 1; i < visibleCount; ++i) {
-    timeouts.push(setTimeout(() => {
-      setShowFull(prev => {
-        const next = [...prev];
-        next[i] = true;
-        return next;
-      });
-    }, 200 + i * 30));
-  }
-  return () => timeouts.forEach(clearTimeout);
-}, [allProducts, visibleCount, selectedCategoryId]);
+// Remove progressive rendering - show all content immediately to prevent layout shifts
+// const [showFull, setShowFull] = useState([true, ...Array(INITIAL_VISIBLE - 1).fill(false)]);
+// useEffect(() => {
+//   setShowFull([true, ...Array(visibleCount - 1).fill(false)]);
+//   let timeouts = [];
+//   for (let i = 1; i < visibleCount; ++i) {
+//     timeouts.push(setTimeout(() => {
+//       setShowFull(prev => {
+//         const next = [...prev];
+//         next[i] = true;
+//         return next;
+//       });
+//     }, 200 + i * 30));
+//   }
+//   return () => timeouts.forEach(clearTimeout);
+// }, [allProducts, visibleCount, selectedCategoryId]);
 
 // --- Hover and image loaded state management moved to parent ---
 const [secondImageLoaded, setSecondImageLoaded] = React.useState({});
@@ -646,28 +646,24 @@ const renderProducts = (productsToShowParam) => {
           </div>
           <div className="pcus-prd-info12">
             <h2 className="pcus-prd-title1">{decodeHTML(p.name)}</h2>
-            {showFull[index] && (
-              <>
-                <div className="pcus-prd-dummy-reviews" style={{ display: "flex", alignItems: "center", margin: "0px 5px" }}>
-                  <div style={{ color: "#FFD700", marginRight: "8px" }}>{"★".repeat(p.rating)}{"☆".repeat(5 - p.rating)}</div>
-                  <div style={{ fontSize: "12px", color: "#666", marginRight: "8px" }}>({p.reviews})</div>
-                  <div style={{ fontSize: "12px", color: "#666" }}>{p.sold} sold</div>
-                </div>
-                <div style={{ height: "1px", width: "100%", backgroundColor: "lightgrey", margin: "0px 0 2px 0", borderRadius: "1px" }} />
-                <div className="prc-row-abc123">
-                  <div className="prc-left-abc123">
-                    <img src={IconAED} alt="AED" style={{ width: "auto", height: "12px", marginRight: "0px", verticalAlign: "middle" }} />
-                    <Price value={p.sale_price} className="prc-sale-abc123" />
-                    <Price value={p.regular_price} className="prc-regular-abc123" />
-                    {p.sale_price < p.regular_price && <span className="prc-off-abc123">{Math.round(((p.regular_price - p.sale_price) / p.regular_price) * 100)}% Off</span>}
-                  </div>
-                </div>
-                <div className="prc-row-badge-btn">
-                  <div className="prc-badge-abc123">Fast Moving Product</div>
-                  <button className="prc-btn-abc123">Buy Now</button>
-                </div>
-              </>
-            )}
+            <div className="pcus-prd-dummy-reviews" style={{ display: "flex", alignItems: "center", margin: "0px 5px" }}>
+              <div style={{ color: "#FFD700", marginRight: "8px" }}>{"★".repeat(p.rating)}{"☆".repeat(5 - p.rating)}</div>
+              <div style={{ fontSize: "12px", color: "#666", marginRight: "8px" }}>({p.reviews})</div>
+              <div style={{ fontSize: "12px", color: "#666" }}>{p.sold} sold</div>
+            </div>
+            <div style={{ height: "1px", width: "100%", backgroundColor: "lightgrey", margin: "0px 0 2px 0", borderRadius: "1px" }} />
+            <div className="prc-row-abc123">
+              <div className="prc-left-abc123">
+                <img src={IconAED} alt="AED" style={{ width: "auto", height: "12px", marginRight: "0px", verticalAlign: "middle" }} />
+                <Price value={p.sale_price} className="prc-sale-abc123" />
+                <Price value={p.regular_price} className="prc-regular-abc123" />
+                {p.sale_price < p.regular_price && <span className="prc-off-abc123">{Math.round(((p.regular_price - p.sale_price) / p.regular_price) * 100)}% Off</span>}
+              </div>
+            </div>
+            <div className="prc-row-badge-btn">
+              <div className="prc-badge-abc123">Fast Moving Product</div>
+              <button className="prc-btn-abc123">Buy Now</button>
+            </div>
           </div>
         </div>
       );
@@ -715,43 +711,41 @@ const renderProducts = (productsToShowParam) => {
         </div>
         <div className="pcus-prd-info12">
           <h2 className="pcus-prd-title1" onClick={() => handleProductClick(p)}>{decodeHTML(p.name || p.slug)}</h2>
-          {showFull[index] && (
-            <>
-              <div className="pcus-prd-dummy-reviews" style={{ display: "flex", alignItems: "center", margin: "0px 5px" }}>
-                {/* API products may not have rating/reviews/sold, so show 0 or blank if missing */}
-                <div style={{ color: "#FFD700", marginRight: "8px" }}>{"★".repeat(Number(p.rating) || 0)}{"☆".repeat(5 - (Number(p.rating) || 0))}</div>
-                <div style={{ fontSize: "12px", color: "#666", marginRight: "8px" }}>({p.reviews || 0})</div>
-                <div style={{ fontSize: "12px", color: "#666" }}>{p.sold || ''}{p.sold ? ' sold' : ''}</div>
-              </div>
-              <div style={{ height: "1px", width: "100%", backgroundColor: "lightgrey", margin: "0px 0 2px 0", borderRadius: "1px" }} />
-              <div className="prc-row-abc123" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '0 8px' }}>
-                <div className="prc-left-abc123" style={{ display: 'flex', alignItems: 'center', padding: '0 4px' }}>
-                  <img src={IconAED} alt="AED" style={{ width: "auto", height: "12px", marginRight: "0px", verticalAlign: "middle" }} />
-                  <Price value={p.sale_price || p.price} className="prc-sale-abc123" />
-                  <Price value={p.regular_price} className="prc-regular-abc123" />
-                  {p.sale_price && p.regular_price && p.sale_price < p.regular_price && (
-                    <span className="prc-off-abc123">{Math.round(((p.regular_price - p.sale_price) / p.regular_price) * 100)}% Off</span>
-                  )}
-                </div>
-                <button
-                  className="prc-cart-btn-abc123"
-                  style={{
-                    background: '#fff',
-                    border: '2px solid #eee',
-                    borderRadius: '50%',
-                    cursor: 'pointer',
-                    padding: 0,
-                    position: 'relative',
-                    width: '38px',
-                    height: '38px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
-                  }}
-                  title="Add to Cart"
-                  ref={cartIconRef}
-                  onClick={(e) => {
+          <div className="pcus-prd-dummy-reviews" style={{ display: "flex", alignItems: "center", margin: "0px 5px" }}>
+            {/* API products may not have rating/reviews/sold, so show 0 or blank if missing */}
+            <div style={{ color: "#FFD700", marginRight: "8px" }}>{"★".repeat(Number(p.rating) || 0)}{"☆".repeat(5 - (Number(p.rating) || 0))}</div>
+            <div style={{ fontSize: "12px", color: "#666", marginRight: "8px" }}>({p.reviews || 0})</div>
+            <div style={{ fontSize: "12px", color: "#666" }}>{p.sold || ''}{p.sold ? ' sold' : ''}</div>
+          </div>
+          <div style={{ height: "1px", width: "100%", backgroundColor: "lightgrey", margin: "0px 0 2px 0", borderRadius: "1px" }} />
+          <div className="prc-row-abc123" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '0 8px' }}>
+            <div className="prc-left-abc123" style={{ display: 'flex', alignItems: 'center', padding: '0 4px' }}>
+              <img src={IconAED} alt="AED" style={{ width: "auto", height: "12px", marginRight: "0px", verticalAlign: "middle" }} />
+              <Price value={p.sale_price || p.price} className="prc-sale-abc123" />
+              <Price value={p.regular_price} className="prc-regular-abc123" />
+              {p.sale_price && p.regular_price && p.sale_price < p.regular_price && (
+                <span className="prc-off-abc123">{Math.round(((p.regular_price - p.sale_price) / p.regular_price) * 100)}% Off</span>
+              )}
+            </div>
+            <button
+              className="prc-cart-btn-abc123"
+              style={{
+                background: '#fff',
+                border: '2px solid #eee',
+                borderRadius: '50%',
+                cursor: 'pointer',
+                padding: 0,
+                position: 'relative',
+                width: '38px',
+                height: '38px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
+              }}
+              title="Add to Cart"
+              ref={cartIconRef}
+              onClick={(e) => {
                     e.stopPropagation();
                     flyToCart(e, p.images?.[0]?.src);
                     if (addToCart) addToCart(p);
@@ -784,8 +778,6 @@ const renderProducts = (productsToShowParam) => {
                   )}
                 </button>
               </div>
-            </>
-          )}
         </div>
       </div>
     );
