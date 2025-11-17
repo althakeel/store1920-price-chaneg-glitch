@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useCart } from "../../contexts/CartContext";
 
-
 const Bundle = ({ product, bundles, selected, setSelected }) => {
   const [variants, setVariants] = useState({});
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
@@ -26,41 +25,64 @@ const Bundle = ({ product, bundles, selected, setSelected }) => {
   const formatAED = (value) => `AED ${value.toFixed(2)}`;
 
   // Handle Buy Now click
-const handleBuyNow = () => {
-  const bundle = bundles[selected];
+  const handleBuyNow = () => {
+    const bundle = bundles[selected];
 
-  // Get bundle image: fallback to main product image
-  const bundleImage = bundle.image || bundle.images?.[0] || bundle.productImage || null;
+    const bundleImage =
+      bundle.image || bundle.images?.[0] || bundle.productImage || null;
 
-  const bundleToCart = {
-  id: bundle.wooId || bundle.id || 0, // make sure this is 523369, 523370, or 523371
-    name: bundle.type,
-    price: bundle.price,
-    originalPrice: bundle.originalPrice,
-    quantity: 1,
-    variation: variants,
-    image: bundleImage, // pass proper image
+    const bundleToCart = {
+      id: bundle.wooId || bundle.id || 0,
+      name: bundle.type,
+      price: bundle.price,
+      originalPrice: bundle.originalPrice,
+      quantity: 1,
+      variation: variants,
+      image: bundleImage,
+    };
+
+    addToCart(bundleToCart, false);
+
+    const query = new URLSearchParams({
+      type: bundleToCart.name,
+      price: bundleToCart.price,
+      quantity: bundleToCart.quantity,
+      image: bundleImage,
+    });
+
+    window.location.href = `/checkout?${query.toString()}`;
   };
 
-  // Add to cart
-  addToCart(bundleToCart, false);
+  // -------------------------------------------------
+  // ⭐ TABBY PROMO WIDGET FOR BUNDLE PRICE (React Safe)
+  // -------------------------------------------------
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src = "https://checkout.tabby.ai/tabby-promo.js";
+    script.onload = () => {
+      if (window.TabbyPromo) {
+        new window.TabbyPromo({
+          selector: "#TabbyPromoBundle",
+          currency: "AED",
+          price: String(bundles[selected]?.price || "0.00"),
+          lang: "en",
+          source: "product",
+          shouldInheritBg: false,
+          publicKey: "your_pk",
+          merchantCode: "your_merchant_code",
+        });
+      }
+    };
+    document.body.appendChild(script);
 
-  // Redirect to checkout
-  const query = new URLSearchParams({
-    type: bundleToCart.name,
-    price: bundleToCart.price,
-    quantity: bundleToCart.quantity,
-    image: bundleImage, // pass image URL if needed
-  });
-
-  window.location.href = `/checkout?${query.toString()}`;
-};
-
+    return () => {
+      const target = document.querySelector("#TabbyPromoBundle");
+      if (target) target.innerHTML = "";
+    };
+  }, [selected]);
 
   return (
     <div style={{ padding: "16px", fontFamily: "Arial, sans-serif" }}>
-      {/* Title */}
-
 
       {/* Bundles */}
       {bundles.map((bundle, index) => {
@@ -80,7 +102,7 @@ const handleBuyNow = () => {
               transition: "all 0.2s ease",
             }}
           >
-            {/* Most Popular Badge */}
+            {/* MOST POPULAR */}
             {bundle.mostPopular && (
               <div
                 style={{
@@ -100,7 +122,7 @@ const handleBuyNow = () => {
               </div>
             )}
 
-            {/* Bundle Info */}
+            {/* Info + Price */}
             <div
               style={{
                 display: "flex",
@@ -116,7 +138,9 @@ const handleBuyNow = () => {
                   {bundle.type}
                 </p>
                 {bundle.note && (
-                  <p style={{ fontSize: "13px", color: "#777", margin: "2px 0" }}>
+                  <p
+                    style={{ fontSize: "13px", color: "#777", margin: "2px 0" }}
+                  >
                     {bundle.note}
                   </p>
                 )}
@@ -136,7 +160,6 @@ const handleBuyNow = () => {
                 </span>
               </div>
 
-              {/* Price */}
               <div style={{ textAlign: "right" }}>
                 <p
                   style={{
@@ -169,7 +192,7 @@ const handleBuyNow = () => {
               />
             </div>
 
-            {/* Variant Selector */}
+            {/* Color options */}
             {bundle.colors &&
               bundle.colors.map((row, i) => (
                 <div
@@ -190,6 +213,7 @@ const handleBuyNow = () => {
                   >
                     #{i + 1}
                   </span>
+
                   {row.map((c, j) => {
                     const key = `${index}-${i}`;
                     const isSelectedColor = variants[key] === c;
@@ -201,7 +225,9 @@ const handleBuyNow = () => {
                           width: "24px",
                           height: "24px",
                           borderRadius: "50%",
-                          border: isSelectedColor ? "2px solid #d45a5a" : "1px solid #ccc",
+                          border: isSelectedColor
+                            ? "2px solid #d45a5a"
+                            : "1px solid #ccc",
                           marginRight: "6px",
                           background: c,
                           cursor: "pointer",
@@ -248,6 +274,9 @@ const handleBuyNow = () => {
         >
           Buy Now – AED {bundles[selected]?.price.toFixed(2)}
         </button>
+
+        {/* ⭐⭐⭐ TABBY WIDGET (BELOW BUTTON) ⭐⭐⭐ */}
+        <div id="TabbyPromoBundle" style={{ marginTop: "12px" }}></div>
       </div>
     </div>
   );

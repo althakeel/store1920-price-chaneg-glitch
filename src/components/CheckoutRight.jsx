@@ -181,13 +181,16 @@ export default function CheckoutRight({ cartItems, formData, createOrder, clearC
       }
 
       if (formData.paymentMethod === 'tabby') {
+  // Construct full phone number from prefix and number
+  const phonePrefix = shippingOrBilling.phone_prefix || '50';
+  const phoneNumber = shippingOrBilling.phone_number || '';
+  const fullPhone = `+971${phonePrefix}${phoneNumber}`;
+
   const normalized = {
     first_name: shippingOrBilling.first_name || 'First',
     last_name:  shippingOrBilling.last_name  || 'Last',
     email:      shippingOrBilling.email      || 'customer@example.com',
-    phone_number: shippingOrBilling.phone_number?.startsWith('+')
-      ? shippingOrBilling.phone_number
-      : `+${shippingOrBilling.phone_number || '971501234567'}`
+    phone_number: fullPhone
   };
 
   const payload = {
@@ -205,9 +208,19 @@ export default function CheckoutRight({ cartItems, formData, createOrder, clearC
 
     const data = await res.json();
     console.log('✅ Tabby Response =>', data);
+    console.log('📋 Tabby Payload Sent =>', payload);
 
-    if (!res.ok || !data.checkout_url) {
-      throw new Error(data.error || 'Failed to start Tabby session.');
+    // Check if response indicates an error or missing checkout_url
+    if (!res.ok || !data.checkout_url || data.error || data.message) {
+      console.error('❌ Tabby API Error Details:', {
+        status: res.status,
+        statusText: res.statusText,
+        response: data
+      });
+      
+      // Use the actual error message from Tabby's response
+      const errorMessage = data.error || data.message || 'Failed to start Tabby session.';
+      throw new Error(errorMessage);
     }
 
     window.location.href = data.checkout_url;
