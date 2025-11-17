@@ -227,7 +227,7 @@ const PaymentMethods = ({ selectedMethod, onMethodSelect, subtotal, cartItems = 
         </div>
 
         {/* Tamara Official Widget */}
-        {/* <div className="payment-method-item" style={{ width: '100%' }}>
+        <div className="payment-method-item" style={{ width: '100%' }}>
           <input
             type="radio"
             id="tamara"
@@ -251,7 +251,7 @@ const PaymentMethods = ({ selectedMethod, onMethodSelect, subtotal, cartItems = 
               ></div>
             </div>
           </label>
-        </div> */}
+        </div>
 
         {/* Cash on Delivery */}
         {hasOnlyStaticProducts && !hasNonStaticProducts && staticProductIds.length > 0 && (
