@@ -26,6 +26,8 @@ const UAE_CITIES = {
   FSH: ['Fujairah', 'Dibba Al-Fujairah', 'Khor Fakkan', 'Masafi', 'Bidiyah', 'Dibba Al-Hisn', 'Al Aqah', 'Al Bithnah', 'Al Faseel', 'Al Hala', 'Al Madhah', 'Al Sharqiyah', 'Al Sakamkam', 'Al Twar', 'Al Jurf']
 };
 
+
+
 const AddressForm = ({ formData, onChange, onSubmit, onClose, saving, error, cartItems }) => {
   const [formErrors, setFormErrors] = useState({});
   const [markerPosition, setMarkerPosition] = useState(null);
@@ -87,6 +89,13 @@ const AddressForm = ({ formData, onChange, onSubmit, onClose, saving, error, car
       }
     }
   }, []);
+
+  useEffect(() => {
+  if (!formData.shipping.delivery_type) {
+    onChange({ target: { name: 'delivery_type', value: 'Home' } }, 'shipping');
+  }
+}, []);
+
 
   // --------------------------
   // Validation Logic
@@ -502,12 +511,12 @@ const AddressForm = ({ formData, onChange, onSubmit, onClose, saving, error, car
                 {formErrors.email && <span style={{ color: 'red', fontSize: '0.85rem' }}>{formErrors.email}</span>} 
               </label>
                 <label>
-                Apartment / Floor
+                Apartment No*
                 <input type="text" name="apartment" value={formData.shipping.apartment} onChange={handleFieldChange} />
               </label>
 
               <label>
-                Street*
+                Building Name / Street*
                 <input type="text" name="street" value={formData.shipping.street} onChange={handleFieldChange} />
                 {formErrors.street && <span style={{ color: 'red' }}>{formErrors.street}</span>}
               </label>

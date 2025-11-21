@@ -130,6 +130,20 @@ import Product161 from "../assets/images/staticproducts/Peeler/12.webp";
 // import Product162 from '../assets/images/staticproducts/Peeler/13.webp'
 // import Product163 from '../assets/images/staticproducts/Peeler/14.webp'
 
+
+
+// 21.11.25
+
+import Product170 from '../assets/images/staticproducts/minproject/1.webp'  
+import Product171 from '../assets/images/staticproducts/minproject/2.webp'
+import Product172 from '../assets/images/staticproducts/minproject/3.webp'
+import Product173 from '../assets/images/staticproducts/minproject/4.webp'
+import Product174 from '../assets/images/staticproducts/minproject/5.webp'
+import Product175 from '../assets/images/staticproducts/minproject/6.webp'
+import Product176 from '../assets/images/staticproducts/minproject/7.webp'
+import Product177 from '../assets/images/staticproducts/minproject/8.webp'
+
+
 const staticProducts = [
   {
     id: 494574,
@@ -1873,6 +1887,181 @@ const staticProducts = [
       {
         text: "Portable and rechargeable — I even take it for family picnics. Love it!",
         author: "Huda S., Abu Dhabi ",
+        stars: 5,
+      },
+    ],
+  },
+
+
+
+
+// 21.11.2025
+
+
+
+  {
+    id: 526257, //
+    name: "Mini Portable Smart Projector",
+    slug: "mini-portable-smart-projector",
+    price: 159.0,
+    description:
+      "Bring the Cinema Home — Anytime, Anywhere 🎥",
+    shortdesc:
+      " Experience crystal-clear 4K visuals, immersive surround sound, and true portability with the HY300 PRO Mini Smart Projector. Enjoy movies, games, and streaming anywhere — from your living room wall to your bedroom ceiling.",
+    subdesc: "Supports 4K & 1080P HD",
+    subdesc1: "Android TV 11.0 with Netflix, Prime Video & YouTube",
+    subdesc2: "Dual-Band WiFi6 + Bluetooth 5.0",
+    subdesc3: "180° Rotatable Projection",
+    subdesc4: " 360° Surround Sound",
+
+    image: Product171,
+    thumb1: Product170,
+    thumb2: Product172,
+    thumb3: Product173,
+    thumb4: Product174,
+    thumb5: Product175,
+    thumb6: Product176,
+    thumb7: Product177,
+
+    bundles: [
+      {
+        type: "Buy 1",
+        id: 526257,
+        name: "Mini Portable Smart Projector",
+        label: "Buy 1 for Only 159 AED",
+        discount: 0,
+        price: 159.0,
+        originalPrice: 349,
+        image: Product177,
+      },
+      {
+        type: "Bundle of 2",
+        id: 526259,
+        name: "Mini Portable Smart Projector",
+        label: "Buy 2 & Get 15% Off",
+        discount: 10,
+        price: 270.0, // 15% off on total 318
+        originalPrice: 699,
+        note: "Perfect for you & a friend",
+        mostPopular: true,
+        image: Product176,
+      },
+      {
+        type: "Bundle of 3",
+        id: 526260,
+        name: "Mini Portable Smart Projector",
+        label: "Buy 3 & Get 25% Off",
+        discount: 25,
+        price:357.50 ,
+        originalPrice: 1048,
+        note: "Best Value",
+        image: Product175,
+      },
+    ],
+    BundleTitle: "BUNDLE AND SAVE MORE!",
+
+    section2contentTitle: " Tired of Small Screens, Tangled Wires, and Clunky Projectors?",
+    section2contentDesc:
+      " Watching your favorite shows or gaming on a tiny screen ruins the experience. Traditional projectors are bulky, noisy, and complicated to set up — not to mention the endless wires and poor connectivity.",
+    section2list: [
+      "  Limited screen size & viewing angle",
+      "  Poor picture quality and lagging playback",
+      " No smart streaming support",
+      " Loud fans and annoying setup",
+
+    ],
+    section2contentPoints: [
+      "Free UAE Shipping",
+      "24/7 Support",
+      "1-Year Warranty",
+      " Easy to Store & Carry",
+    ],
+    section2image: Product174,
+
+    section3title: "What’s Included in the Box",
+    section3image: Product173,
+    section3points: [
+      " Mini Portable Projector",
+      "  Remote Control",
+      " Power Adapter",
+      " User Manual",
+    ],
+
+    sectionProgressTitle: "Trusted by ",
+    sectionProgressSubtitle: "1000+ UAE Families and Counting",
+    sectionProgress: [
+      { title: "Crisp 1080P with 4K support and 160 ANSI brightness up to 130", desc: "", percent: 96 },
+      { title: "180° rotatable design for easy projection on walls, ceilings, and more.", desc: "", percent: 92 },
+      { title: "Instant wireless pairing with WiFi 6 and Bluetooth 5.0—no cables needed.", desc: "  ", percent: 89 },
+      { title: "Long-lasting battery lets you enjoy movies and games on the go", desc: "", percent: 94 },
+    ],
+
+    comparisonData: {
+      title: "Smarter Than Your Average Projector",
+      description:
+        "  With Android TV 11.0, the HY300 PRO gives you instant access to Netflix, Prime Video, YouTube, Disney+, and more — no external devices needed. Use voice search, install apps, and sync your phone for instant casting.",
+      headers: ["Feature", "HY300 PRO", "Regular Projectors"],
+      rows: [
+        {
+          feature: "Android 11 Smart TV",
+          lumineux: true,
+          others: false,
+        },
+        {
+          feature: "WiFi 6 Dual Band",
+          lumineux: true,
+          others: false,
+        },
+        { feature: "Bluetooth 5.0", lumineux: true, others: false },
+        {
+          feature: "Auto Keystone Correction",
+          lumineux: true,
+          others: false,
+        },
+        {
+          feature: "Rotatable 180° Lens",
+          lumineux: true,
+          others: false,
+        },
+         {
+          feature: "Noise Level <25dB",
+          lumineux: true,
+          others: false,
+        },
+      ],
+    },
+    section5image: Product172,
+
+    Guaranteetitle: " Experience It Risk-Free for 30 Days",
+    Guranteedesc: "We’re so confident you’ll love the HY300 PRO Mini Projector that we offer a 30-day money-back guarantee. Try it at home, in your office, or even outdoors — if it doesn’t transform your viewing experience, we’ll refund you in full.",
+    Faq1Q: "Does it support Netflix and YouTube?",
+    fAQ1A:
+      " Yes! Pre-installed apps like Netflix, Prime Video, YouTube, and Disney+ come built-in.",
+    Faq2Q: "Can it project on the ceiling?",
+    fAQ2A: "Absolutely — its 180° rotatable lens lets you project on walls, ceilings, or floors.",
+    Faq3Q: "How big is the projection size?",
+    fAQ3A: "Up to 150 inches, depending on distance.",
+    Faq4Q: "Does it connect to consoles like PS5?",
+    fAQ4A: "Yes, via HDMI 4K @ 60Hz with zero lag.",
+    Faq5Q: "How quiet is it?",
+    fAQ5A: "Less than 25dB — whisper silent.",
+
+    reviewsTitle: "Customer Reviews",
+    reviewsRating: 5,
+    reviews: [
+      {
+        text: "Unbelievable clarity for such a small device! I projected on the ceiling — perfect for movie nights.",
+        author: "Daniel M",
+        stars: 5,
+      },
+      {
+        text: "Seamless streaming, no buffering. My kids use it for Netflix and YouTube daily!",
+        author: "Aisha P",
+        stars: 5,
+      },
+      {
+        text: "Game-changer for my presentations. Compact, quiet, and powerful.",
+        author: "Kevin J.",
         stars: 5,
       },
     ],

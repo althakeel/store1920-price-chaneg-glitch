@@ -46,17 +46,32 @@ const CustomProductDetails = () => {
   }
 
   // Add selected bundle to cart
+  // Always pass a valid price for both bundles and main product
   const handleAddToCart = (bundleWithVariants) => {
-    const cartItem = {
-      productId: product.id,
-      wooId: product.wooId,
-      name: product.name,
-      price: bundleWithVariants.price,
-      originalPrice: bundleWithVariants.originalPrice,
-      discount: bundleWithVariants.discount,
-      bundleType: `${bundleWithVariants.type} - ${product.name}`,
-      quantity: 1,
-    };
+    let cartItem;
+    if (bundleWithVariants && typeof bundleWithVariants.price !== 'undefined') {
+      cartItem = {
+        productId: product.id,
+        wooId: product.wooId,
+        name: product.name,
+        price: bundleWithVariants.price,
+        originalPrice: bundleWithVariants.originalPrice,
+        discount: bundleWithVariants.discount,
+        bundleType: `${bundleWithVariants.type} - ${product.name}`,
+        quantity: 1,
+      };
+    } else {
+      cartItem = {
+        productId: product.id,
+        wooId: product.wooId,
+        name: product.name,
+        price: product.price,
+        originalPrice: product.originalPrice || product.price,
+        discount: 0,
+        bundleType: `Single - ${product.name}`,
+        quantity: 1,
+      };
+    }
     addToCart(cartItem);
     alert("Product added to cart!");
   };

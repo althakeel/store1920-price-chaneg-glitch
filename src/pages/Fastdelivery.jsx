@@ -9,8 +9,21 @@ import Product7 from '../assets/images/staticproducts/Air Blower/1.webp';
 import Product8 from '../assets/images/staticproducts/AIR BLOWER MINI/9.webp'
 import Product9 from '../assets/images/staticproducts/Steamer/1.webp'
 import Product10 from '../assets/images/staticproducts/Peeler/1.webp'
+import Product11 from '../assets/images/staticproducts/minproject/4.webp'
 
 const staticProducts = [
+    {
+    id: "Mini Portable Smart Projector",
+    name: "Mini Portable Smart Projector",
+    price: "159.00",
+    regular_price: "349.00",
+    sale_price: "159.00",
+    images: [{ src: Product11 }],
+    path: "/products/mini-portable-smart-projector",
+    rating: 5,
+    reviews: 48,
+    sold: 139
+  },
   {
     id: "68V Cordless Portable Car Wash Pressure Washer Gun with Dual",
     name: "68V Cordless Portable Car Wash Pressure Washer Gun with Dual",

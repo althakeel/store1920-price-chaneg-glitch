@@ -21,6 +21,7 @@ import Product7 from '../../../assets/images/staticproducts/Air Blower/1.webp'
 import Product8 from '../../../assets/images/staticproducts//AIR BLOWER MINI/1.webp'
 import Product9 from '../../../assets/images/staticproducts/Steamer/1.webp'
 import Product6 from '../../../assets/images/staticproducts/Peeler/1.webp'
+import Product12 from '../../../assets/images/staticproducts/minproject/1.webp'
 // import Product8 from '../../../assets/images/staticproducts/'
 
 
@@ -205,10 +206,24 @@ const staticProducts = [
     sold: 305,
     categories: [29688, 6519], // Recommended, Home Appliances
   },
+  {
+    id: 526258,
+    name: "Mini Portable Smart Projector",
+    price: 159.0,
+    regular_price: 349.0,
+    sale_price: 159.0,
+    images: [{ src: Product12 }],
+    slug: "mini-portable-smart-projector",
+    path: "/products/mini-portable-smart-projector",
+    rating: 5,
+    reviews: 45,
+    sold: 135,
+    categories: [29688, 6519], // Recommended, Home Appliances
+  },
 ];
  
 
-const staticPositions = [2,5, 11, 15, 19, 24,28, 32, 39,22,];
+const staticPositions = [2,5, 11, 15, 19, 24,28, 32, 39,22, 28];
 
 // In-memory cache for API products by category
 const apiProductCache = {};
