@@ -182,9 +182,8 @@ export default function CheckoutRight({ cartItems, formData, createOrder, clearC
 
       if (formData.paymentMethod === 'tabby') {
   // Construct full phone number from prefix and number
-  const phonePrefix = shippingOrBilling.phone_prefix || '50';
-  const phoneNumber = shippingOrBilling.phone_number || '';
-  const fullPhone = `+971${phonePrefix}${phoneNumber}`;
+        const phone = shippingOrBilling.phone_number || "";
+        const fullPhone = `+971${phone}`;
 
   const normalized = {
     first_name: shippingOrBilling.first_name || 'First',

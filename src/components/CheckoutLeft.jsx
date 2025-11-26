@@ -197,7 +197,7 @@ export default function CheckoutLeft({
                   <div className="saved-address-label">Phone</div>
                   <div className="saved-address-colon">:</div>
                   <div className="saved-address-value">
-                    +971{formData.shipping.phone_prefix || '50'}{formData.shipping.phone_number || ''}
+                   +971{formData.shipping.phone_number}
                   </div>
 
                   <div className="saved-address-label">State</div>

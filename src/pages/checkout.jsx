@@ -299,9 +299,9 @@ useEffect(() => {
     // Compose full phone number for backend
     const getFullPhone = (data) => {
       // Always use +971 as country code, then prefix, then number
-      const prefix = data.phone_prefix || '50';
+
       const number = data.phone_number || '';
-      return `+971${prefix}${number}`;
+      return `+971${number}`;
     };
     const line_items = cartItems.map(i => ({ product_id: i.id, quantity: i.quantity }));
     const userId = user?.id;

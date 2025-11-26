@@ -6,6 +6,20 @@ import CustomMap from '../../components/checkoutleft/CustomMap';
 
 const LOCAL_STORAGE_KEY = 'checkoutAddressData';
 
+const normalizePhone = (value) => {
+  if (!value) return "";
+
+  let digits = value.replace(/\D/g, "");
+
+  if (digits.startsWith("971")) digits = digits.slice(3);
+  if (digits.startsWith("0")) digits = digits.slice(1);
+
+  if (digits.length > 9) digits = digits.slice(0, 9);
+
+  return digits;
+};
+
+
 const UAE_EMIRATES = [
   { code: 'AUH', name: 'Abu Dhabi' },
   { code: 'DXB', name: 'Dubai' },
@@ -77,9 +91,16 @@ const AddressForm = ({ formData, onChange, onSubmit, onClose, saving, error, car
       try {
         const data = JSON.parse(saved);
         if (data.shipping) {
-          Object.keys(data.shipping).forEach((key) =>
-            onChange({ target: { name: key, value: data.shipping[key] } }, 'shipping')
-          );
+        Object.keys(data.shipping).forEach((key) => {
+        let val = data.shipping[key];
+
+        // CLEAN PHONE ON LOAD
+        if (key === "phone_number" || key === "phone") {
+          val = normalizePhone(val);
+        }
+
+        onChange({ target: { name: key, value: val } }, 'shipping');
+      });
         }
         if (data.saveAsDefault !== undefined) {
           onChange({ target: { name: 'saveAsDefault', value: data.saveAsDefault } });
@@ -115,7 +136,7 @@ const AddressForm = ({ formData, onChange, onSubmit, onClose, saving, error, car
       case 'phone_number':
         if (!value || value.trim() === '') return 'Phone number is required';
         // Accept exactly 7 digits for the phone number field
-        if (!/^[0-9]{7}$/.test(value)) return 'Invalid phone number';
+        if (!/^[0-9]{9}$/.test(value)) return 'Invalid phone number';
         break;
       case 'email':
         if (!value || !/\S+@\S+\.\S+/.test(value)) return 'Invalid email';
@@ -166,14 +187,26 @@ const AddressForm = ({ formData, onChange, onSubmit, onClose, saving, error, car
     setIsSubmitting(true);
 
     // Validate phone: must be 7 digits (the last part)
-    const phone = (formData.shipping.phone_number || '').toString().trim();
-    const phonePrefix = formData.shipping.phone_prefix || '50';
-    const countryCode = formData.shipping.country_code || '+971';
+    // const phone = (formData.shipping.phone_number || '').toString().trim();
+  
+
+    const raw = formData.shipping.phone_number || "";
+    const phone = normalizePhone(raw);
+
+            if (!/^[0-9]{9}$/.test(phone)) {
+              alert("Please enter a valid UAE mobile number.");
+              setFormErrors((prev) => ({ ...prev, phone_number: "Invalid number" }));
+              setIsSubmitting(false);
+              return;
+            }
+
+            const fullPhone = `+971${phone}`;
+
     
-    console.log('Phone validation:', { phone, length: phone.length, test: /^[0-9]{7}$/.test(phone) });
+             console.log('Phone validation:', { phone, length: phone.length, test: /^[0-9]{9}$/.test(phone) });
     
     // Check if phone_number is exactly 7 digits
-    if (!phone || !/^[0-9]{7}$/.test(phone)) {
+    if (!phone || !/^[0-9]{9}$/.test(phone)) {
       alert('Please enter a valid 7-digit phone number before submitting.');
       setFormErrors((prev) => ({ ...prev, phone_number: 'Invalid or incomplete phone number' }));
       setIsSubmitting(false);
@@ -198,7 +231,7 @@ const AddressForm = ({ formData, onChange, onSubmit, onClose, saving, error, car
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(formData));
 
       // Compose full phone number for backend
-      const fullPhone = `${countryCode}${phonePrefix}${phone}`;
+      const fullPhone = `+971${phone}`;
 
       // small delay to ensure phone input updates last digit
       await new Promise((res) => setTimeout(res, 200));
@@ -468,41 +501,54 @@ const AddressForm = ({ formData, onChange, onSubmit, onClose, saving, error, car
                 {formErrors.last_name && <span style={{ color: 'red' }}>{formErrors.last_name}</span>}
               </label>
 
-              <label>
-                Mobile Number*
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 4 }}>
-                  <span style={{ padding: '8px 10px', borderRadius: 6, border: '1px solid #ccc', background: '#f7f7f7', fontWeight: 500, fontSize: '1rem', minWidth: 54, textAlign: 'center' }}>+971</span>
-                  <select
-                    value={formData.shipping.phone_prefix || '50'}
-                    onChange={e => onChange({ target: { name: 'phone_prefix', value: e.target.value } }, 'shipping')}
-                    style={{ padding: '8px 6px', borderRadius: 6, border: '1px solid #ccc', fontWeight: 500, fontSize: '1rem', width: 60 }}
-                  >
-                    <option value="50">50</option>
-                    <option value="52">52</option>
-                    <option value="54">54</option>
-                    <option value="55">55</option>
-                    <option value="56">56</option>
-                    <option value="58">58</option>
-                  </select>
-                  <input
-                    type="text"
-                    name="phone_number"
-                    value={formData.shipping.phone_number ? formData.shipping.phone_number.slice(0, 7).replace(/[^0-9]/g, '') : ''}
-                    onChange={e => {
-                      // Only allow numbers, max 7 digits
-                      let val = e.target.value.replace(/[^0-9]/g, '');
-                      if (val.length > 7) val = val.slice(0, 7);
-                      onChange({ target: { name: 'phone_number', value: val } }, 'shipping');
-                    }}
-                    maxLength={7}
-                    inputMode="numeric"
-                    pattern="[0-9]{7}"
-                    style={{ flex: 1, padding: '8px 10px', borderRadius: 6, border: '1px solid #ccc', fontSize: '1rem' }}
-                    placeholder="1234567"
-                  />
-                </div>
-                {formErrors.phone_number && <span style={{ color: 'red' }}>{formErrors.phone_number}</span>}
-              </label>
+        <label>
+  Mobile Number*
+  <div className="phone-wrapper" style={{ marginTop: 4 }}>
+
+    {/* UAE Flag + Prefix inside input */}
+    <span className="phone-prefix">
+      +971
+    </span>
+
+    <input
+      type="text"
+      name="phone_number"
+      className="phone-input"
+      value={formData.shipping.phone_number || ""}
+      onChange={(e) => {
+        const clean = normalizePhone(e.target.value);
+        onChange(
+          { target: { name: "phone_number", value: clean } },
+          "shipping"
+        );
+
+        const errorMsg = /^[0-9]{9}$/.test(clean)
+          ? ""
+          : "Must be 9 digits";
+        setFormErrors((prev) => ({ ...prev, phone_number: errorMsg }));
+      }}
+      maxLength={9}
+      inputMode="numeric"
+      pattern="[0-9]*"
+      placeholder="501234567"
+      style={{
+        width: "100%",
+        padding: "10px 12px",
+        paddingLeft: "70px",
+        borderRadius: 6,
+        border: "1px solid #ccc",
+        fontSize: "1rem",
+      }}
+    />
+  </div>
+
+  {formErrors.phone_number && (
+    <span style={{ color: "red" }}>{formErrors.phone_number}</span>
+  )}
+</label>
+
+
+
 
               <label style={{ display: 'flex', flexDirection: 'column', fontWeight: 500, color: '#444' }}> 
                 Email*
