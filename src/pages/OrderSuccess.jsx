@@ -282,7 +282,7 @@ export default function OrderSuccess() {
                   <div className="product-quantity">× {item.quantity}</div>
                 </div>
               </div>
-              <div className="product-total">{formatPrice(item.total)}</div>
+              <div className="product-total">{formatPrice(order.total)}</div>
             </div>
           ))}
 
