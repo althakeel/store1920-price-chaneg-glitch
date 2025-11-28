@@ -12,9 +12,20 @@ import banner4 from '../assets/images/theme/banner/Banners-purple-2.webp';
 import banner5 from '../assets/images/theme/banner/Banners Halloween 2.webp';
 import banner6 from '../assets/images/theme/banner/Bannersmorron.webp';
 import Banner7 from '../assets/images/theme/theme6/Main.webp';
+import Banner8 from '../assets/images/theme/theme6/nation-day-banner.webp'; 
 
 export const themes = {
-  1: {
+    1: {
+    logo: Logo7,
+    navbarBg: '#042232',
+    bannerKey: Banner8,
+    bannerBg: '#A7B8C2',
+    lightningBanner: {
+      backgroundColor: '#A7B8C2',
+      textColor: '#000000'
+    }
+  },
+  2: {
     logo: Logo7,
     navbarBg: '#042232',
     bannerKey: Banner7,
@@ -24,7 +35,7 @@ export const themes = {
       textColor: '#000000'
     }
   },
-  2: {
+  3: {
     logo: Logo6,
     navbarBg: '#6F1123',
     bannerKey: banner6,
@@ -34,7 +45,7 @@ export const themes = {
       textColor: '#000000'
     }
   },
-  3: {
+  4: {
     logo: Logo2,
     navbarBg: '#37AADA',
     bannerKey: banner2,
@@ -44,7 +55,7 @@ export const themes = {
       textColor: '#FFFFFF'
     }
   },
-  4: {
+  5: {
     logo: Logo3,
     navbarBg: '#E46000',
     bannerKey: banner3,
@@ -54,7 +65,7 @@ export const themes = {
       textColor: '#FFFFFF'
     }
   },
-  5: {
+  6: {
     logo: Logo4,
     navbarBg: '#B743C2',
     bannerKey: banner4,
@@ -63,7 +74,7 @@ export const themes = {
       backgroundColor: '#6C3BFF',
       textColor: '#FFFFFF'
     },
-      6: {
+      7: {
     logo: Logo5,
     navbarBg: '#1A1A1A',
     bannerKey: banner5,

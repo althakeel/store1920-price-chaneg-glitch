@@ -25,7 +25,7 @@ const CourierBanner = () => {
             objectFit: 'cover',
             objectPosition: 'center center'
           }}
-          src='https://db.store1920.com/wp-content/uploads/2025/11/Mini-1-scaled.webp' 
+          src='https://db.store1920.com/wp-content/uploads/2025/11/3-1-scaled.webp' 
           alt="Courier Banner" 
         />
       </div>

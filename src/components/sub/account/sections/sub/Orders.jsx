@@ -379,7 +379,7 @@ const AllOrders = ({
                 onKeyDown={(e) => { if (e.key === 'Enter') handleProductClick(slugify(item.name)); }}
               >
                 <img src={item.image?.src || 'https://via.placeholder.com/100'} alt={item.name} />
-                <div className="product-price">{order.currency} {item.price}</div>
+                <div className="product-price">{order.currency} {order.total}</div>
               </div>
             ))}
           </div>
