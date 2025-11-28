@@ -209,6 +209,28 @@ export default function OrderSuccess() {
           </button>
         </div>
 
+          <div
+          style={{
+            padding: "12px 18px",
+            marginBottom: "15px",
+            borderRadius: "6px",
+            backgroundColor: "#fff3cd",
+            border: "1px solid #ffeeba",
+            color: "#856404",
+            fontFamily: "Arial, sans-serif",
+          }}
+        >
+      
+          {/* <strong style={{ fontSize: "15px", display: "block", marginBottom: "4px" }}> */}
+          <h3>    ⚠️ 🇦🇪 Holiday Notice:</h3>
+        
+          {/* </strong> */}
+      
+          <span style={{ fontSize: "14px", lineHeight: "1.4",  fontWeight: "bold" }}>
+          Expect minor delivery delays during UAE National Day celebrations.
+          </span>
+        </div>
+
         {/* Order Number Section */}
         <div className="order-number-section">
           <h2 className="order-id" onClick={handleCopyOrderId}>

@@ -143,7 +143,7 @@ const GridCategories = () => {
   // Set banners
   useEffect(() => {
     setBanners([
-      { id: 1, image: "https://db.store1920.com/wp-content/uploads/2025/11/Sub-1-1.webp" },
+      { id: 1, image: "https://db.store1920.com/wp-content/uploads/2025/11/2-1.webp" },
       { id: 2, image: "https://db.store1920.com/wp-content/uploads/2025/11/Banners-Tamara.webp" },
     ]);
   }, []);
@@ -220,7 +220,7 @@ const GridCategories = () => {
           <div className="gcx-banner">
             <img
               src={banners[currentBanner]?.image}
-              alt={`Banner ${banners[currentBanner]?.id}`}
+              alt={`Banner ${banners[currentBanner]?.id}`} 
               style={{ transition: "opacity 0.5s ease-in-out" }}
             />
           </div>
