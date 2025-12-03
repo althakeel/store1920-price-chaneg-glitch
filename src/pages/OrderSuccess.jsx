@@ -209,7 +209,7 @@ export default function OrderSuccess() {
           </button>
         </div>
 
-          <div
+          {/* <div
           style={{
             padding: "12px 18px",
             marginBottom: "15px",
@@ -221,15 +221,14 @@ export default function OrderSuccess() {
           }}
         >
       
-          {/* <strong style={{ fontSize: "15px", display: "block", marginBottom: "4px" }}> */}
           <h3>    ⚠️ 🇦🇪 Holiday Notice:</h3>
         
-          {/* </strong> */}
+   
       
           <span style={{ fontSize: "14px", lineHeight: "1.4",  fontWeight: "bold" }}>
           Expect minor delivery delays during UAE National Day celebrations.
           </span>
-        </div>
+        </div> */}
 
         {/* Order Number Section */}
         <div className="order-number-section">

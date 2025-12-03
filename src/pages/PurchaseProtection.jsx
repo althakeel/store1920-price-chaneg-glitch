@@ -7,7 +7,7 @@ const PurchaseProtection = () => {
       {/* Top Banner */}
       <section className="pp-banner-section">
         <div className="pp-container pp-banner-content">
-          <img src="https://db.store1920.com/wp-content/uploads/2025/07/notification.png" alt="Protection" className="pp-banner-icon" />
+          {/* <img src="https://db.store1920.com/wp-content/uploads/2025/07/notification.png" alt="Protection" className="pp-banner-icon" /> */}
           <div>
             <h2>100% Purchase Protection</h2>
             <p>At Store1920, your satisfaction is our priority. Enjoy a secure shopping experience with guaranteed support, timely delivery, and easy returns.</p>

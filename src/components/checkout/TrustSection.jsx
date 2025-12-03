@@ -20,28 +20,7 @@ const TrustSection = () => {
       {/* Delivery Guarantee */}
       <div className="trust-box">
         {/* Announcement Alert */}
-        <div
-          style={{
-            padding: "12px 18px",
-            marginBottom: "15px",
-            borderRadius: "6px",
-            backgroundColor: "#fff3cd",
-            border: "1px solid #ffeeba",
-            color: "#856404",
-            fontFamily: "Arial, sans-serif",
-          }}
-        >
-      
-          {/* <strong style={{ fontSize: "15px", display: "block", marginBottom: "4px" }}> */}
-          <h3>    ⚠️ 🇦🇪 Holiday Notice:</h3>
-        
-          {/* </strong> */}
-      
-          <span style={{ fontSize: "14px", lineHeight: "1.4",  fontWeight: "bold" }}>
-          Expect minor delivery delays during UAE National Day celebrations.
-          </span>
-        </div>
-
+       
         <h3>🚚 Delivery Guarantee</h3>
         <ul>
           <li>✔ AED 20.00 Store Credit if your delivery is delayed by more than 7 days.</li>
