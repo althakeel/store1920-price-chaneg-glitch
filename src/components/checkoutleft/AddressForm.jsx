@@ -6,17 +6,26 @@ import CustomMap from '../../components/checkoutleft/CustomMap';
 
 const LOCAL_STORAGE_KEY = 'checkoutAddressData';
 
+// const normalizePhone = (value) => {
+//   if (!value) return "";
+
+//   let digits = value.replace(/\D/g, "");
+
+//   if (digits.startsWith("971")) digits = digits.slice(3);
+//   if (digits.startsWith("0")) digits = digits.slice(1);
+
+//   if (digits.length > 9) digits = digits.slice(0, 9);
+
+//   return digits;
+// };
+
 const normalizePhone = (value) => {
   if (!value) return "";
 
   let digits = value.replace(/\D/g, "");
 
-  if (digits.startsWith("971")) digits = digits.slice(3);
-  if (digits.startsWith("0")) digits = digits.slice(1);
-
-  if (digits.length > 9) digits = digits.slice(0, 9);
-
-  return digits;
+  // Allow only 9 digits max
+  return digits.slice(0, 9);
 };
 
 
