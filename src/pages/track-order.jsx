@@ -8,7 +8,11 @@ const TrackDeepOrder = () => {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [truckPosition, setTruckPosition] = useState(0);
-  const [hasSearched, setHasSearched] = useState(false); // ✅ Track if user has searched
+  const [hasSearched, setHasSearched] = useState(false);
+
+  // ✅ New states to strictly control UI
+  const [hasTrackingData, setHasTrackingData] = useState(false); // only when C3X data is present
+  const [orderExistsOnly, setOrderExistsOnly] = useState(false); // only when order exists in Woo but C3X not available
 
   // Return & Replacement states
   const [showRRModal, setShowRRModal] = useState(false);
@@ -34,15 +38,48 @@ const TrackDeepOrder = () => {
     "Delivered",
   ];
 
+  // ✅ Check if order exists in your system (WooCommerce backend)
+  const checkOrderExists = async (tracking) => {
+    try {
+      const res = await fetch(
+        "https://db.store1920.com/wp-json/custom/v1/check-order-exists",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ tracking }),
+        }
+      );
+
+      if (!res.ok) return false;
+      const json = await res.json();
+      return json?.exists === true;
+    } catch {
+      return false;
+    }
+  };
+
   const fetchOrder = async () => {
     if (!orderId.trim()) return;
 
-    setHasSearched(true); // ✅ mark that user searched
+    setHasSearched(true);
     setLoading(true);
+
+    // reset
     setErrorMsg("");
     setOrderDetails(null);
     setLogs([]);
     setTruckPosition(0);
+    setStatusResults(null);
+    setRrSuccessMsg("");
+    setRrErrorMsg("");
+
+    setHasTrackingData(false);
+    setOrderExistsOnly(false);
+
+    const tracking = orderId.trim();
+
+    // 1️⃣ Try C3X tracking first
+    let gotC3X = false;
 
     try {
       const response = await fetch(
@@ -50,37 +87,68 @@ const TrackDeepOrder = () => {
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ TrackingAWB: orderId.trim() }),
+          body: JSON.stringify({ TrackingAWB: tracking }),
         }
       );
 
-      if (!response.ok) throw new Error("C3X API error");
-      const data = await response.json();
+      if (response.ok) {
+        const data = await response.json();
 
-      if (data?.AirwayBillTrackList?.length) {
-        const trackingData = data.AirwayBillTrackList[0];
-        if (trackingData.AirWayBillNo) {
-          setOrderDetails(trackingData);
-          setLogs(trackingData.TrackingLogDetails || []);
-          const progress = parseInt(trackingData.ShipmentProgress ?? 0);
-          setTruckPosition(progress);
-          // fetch any existing return/replacement requests for this tracking
-          try {
-            await fetchRRStatus(trackingData.AirWayBillNo);
-          } catch (e) {
-            // ignore — fetchRRStatus sets its own error state
+        if (data?.AirwayBillTrackList?.length) {
+          const trackingData = data.AirwayBillTrackList[0];
+
+          if (trackingData?.AirWayBillNo) {
+            gotC3X = true;
+
+            setOrderDetails(trackingData);
+            const logArr = trackingData.TrackingLogDetails || [];
+            setLogs(logArr);
+
+            const progress = parseInt(trackingData.ShipmentProgress ?? 0);
+            setTruckPosition(Number.isFinite(progress) ? progress : 0);
+
+            // ✅ Mark that we have real tracking data
+            setHasTrackingData(true);
+            setOrderExistsOnly(false);
+
+            // fetch RR status (only if we have AirWayBillNo)
+            try {
+              await fetchRRStatus(trackingData.AirWayBillNo);
+            } catch {}
+
+            setLoading(false);
+            return;
           }
-        } else {
-          setOrderDetails(null);
         }
-      } else {
-        setOrderDetails(null);
       }
     } catch (err) {
+      // ignore — fallback to order-exists check
       console.error("C3X Tracking Error:", err);
-      setErrorMsg(
-        "⚠️ Unable to fetch tracking details at the moment. Please try again later."
-      );
+    }
+
+    // 2️⃣ If NO tracking data found, check if order exists in our system
+    if (!gotC3X) {
+      const exists = await checkOrderExists(tracking);
+
+      if (exists) {
+        // ✅ Show ONLY progress bar at step 0
+        setHasTrackingData(false);
+        setOrderExistsOnly(true);
+        setTruckPosition(0);
+
+        // IMPORTANT: do not set fake Shipment Details
+        setOrderDetails(null);
+        setLogs([]);
+
+        setLoading(false);
+        return;
+      }
+
+      // 3️⃣ Order not found => show ONLY info message (no progress)
+      setHasTrackingData(false);
+      setOrderExistsOnly(false);
+      setOrderDetails(null);
+      setLogs([]);
     }
 
     setLoading(false);
@@ -89,22 +157,23 @@ const TrackDeepOrder = () => {
   // Fetch existing return/replacement requests for a tracking number
   const fetchRRStatus = async (tracking) => {
     if (!tracking) return;
-    setRrErrorMsg('');
+    setRrErrorMsg("");
     try {
-      const res = await fetch(`https://db.store1920.com/wp-json/custom/v1/check-return-status/${encodeURIComponent(tracking)}`);
-      if (!res.ok) throw new Error('Failed to fetch status');
+      const res = await fetch(
+        `https://db.store1920.com/wp-json/custom/v1/check-return-status/${encodeURIComponent(
+          tracking
+        )}`
+      );
+      if (!res.ok) throw new Error("Failed to fetch status");
       const json = await res.json();
       setStatusResults(json);
-      // if there are existing requests, store statusResults (UI will adapt)
       return json;
     } catch (err) {
-      console.error('fetchRRStatus', err);
-      setRrErrorMsg('Unable to fetch return/replacement status right now.');
+      console.error("fetchRRStatus", err);
+      setRrErrorMsg("Unable to fetch return/replacement status right now.");
       return null;
     }
   };
-
-  // schedule feature removed
 
   // Handle image files and convert to base64 data URLs
   const handleFilesChange = (e) => {
@@ -116,7 +185,6 @@ const TrackDeepOrder = () => {
       };
       reader.readAsDataURL(file);
     });
-    // reset input value so same file can be re-selected if needed
     e.target.value = null;
   };
 
@@ -128,12 +196,13 @@ const TrackDeepOrder = () => {
     setRrErrorMsg("");
     setRrSuccessMsg("");
 
+    // Return/Replace requires tracking details (delivered)
     if (!orderDetails?.AirWayBillNo && !orderId) {
-      setRrErrorMsg('Missing tracking number.');
+      setRrErrorMsg("Missing tracking number.");
       return;
     }
     if (!rrType || !rrReason) {
-      setRrErrorMsg('Please select type and reason.');
+      setRrErrorMsg("Please select type and reason.");
       return;
     }
 
@@ -141,7 +210,7 @@ const TrackDeepOrder = () => {
     try {
       const payload = {
         trackingNumber: orderDetails?.AirWayBillNo || orderId,
-        orderId: orderDetails?.OrderNo || orderDetails?.Reference || '',
+        orderId: orderDetails?.OrderNo || orderDetails?.Reference || "",
         type: rrType,
         reason: rrReason,
         comments: rrComments,
@@ -151,37 +220,42 @@ const TrackDeepOrder = () => {
         customerPhone: rrCustomerPhone,
       };
 
-      const res = await fetch('https://db.store1920.com/wp-json/custom/v1/submit-return-replacement', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
+      const res = await fetch(
+        "https://db.store1920.com/wp-json/custom/v1/submit-return-replacement",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
 
       const json = await res.json();
       if (!res.ok) {
-        const msg = json?.message || json?.error || 'Submission failed';
+        const msg = json?.message || json?.error || "Submission failed";
         throw new Error(msg);
       }
 
-      setRrSuccessMsg('Request submitted successfully. Reference ID: ' + (json.request_id || '—'));
+      setRrSuccessMsg(
+        "Request submitted successfully. Reference ID: " +
+          (json.request_id || "—")
+      );
       setShowRRModal(false);
-      // refresh status for this tracking number so UI updates (hide schedule, show request exists)
+
       try {
         await fetchRRStatus(payload.trackingNumber);
-      } catch (e) {
-        // ignore
-      }
+      } catch {}
+
       // clear form
-      setRrType('Return');
-      setRrReason('');
-      setRrComments('');
+      setRrType("Return");
+      setRrReason("");
+      setRrComments("");
       setRrImages([]);
-      setRrCustomerName('');
-      setRrCustomerEmail('');
-      setRrCustomerPhone('');
+      setRrCustomerName("");
+      setRrCustomerEmail("");
+      setRrCustomerPhone("");
     } catch (err) {
-      console.error('RR Submit Error', err);
-      setRrErrorMsg(err.message || 'Failed to submit request');
+      console.error("RR Submit Error", err);
+      setRrErrorMsg(err.message || "Failed to submit request");
     }
     setSubmittingRR(false);
   };
@@ -204,27 +278,23 @@ const TrackDeepOrder = () => {
           padding: 25,
         }}
       >
-        <h1
-          style={{
-            textAlign: "center",
-            color: "#1976d2",
-            marginBottom: 20,
-          }}
-        >
+        <h1 style={{ textAlign: "center", color: "#1976d2", marginBottom: 20 }}>
           🚚 Track & Schedule Your Order
         </h1>
 
         {/* Fixed Small Buttons Top Right */}
-        <div style={{
-          position: 'fixed',
-          top: 20,
-          right: 20,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 10,
-          zIndex: 500,
-        }}>
-        </div>
+        <div
+          style={{
+            position: "fixed",
+            top: 20,
+            right: 20,
+            display: "flex",
+            flexDirection: "column",
+            gap: 10,
+            zIndex: 500,
+          }}
+        ></div>
+
         <div style={{ marginBottom: 20 }}>
           <input
             type="text"
@@ -232,7 +302,7 @@ const TrackDeepOrder = () => {
             value={orderId}
             onChange={(e) => {
               setOrderId(e.target.value);
-              setHasSearched(false); // ✅ Reset message on new input
+              setHasSearched(false);
               setErrorMsg("");
             }}
             style={{
@@ -244,6 +314,7 @@ const TrackDeepOrder = () => {
               fontSize: 15,
             }}
           />
+
           <button
             onClick={fetchOrder}
             disabled={loading}
@@ -263,47 +334,50 @@ const TrackDeepOrder = () => {
           </button>
 
           {/* Return/Replace and Contact Support Buttons */}
-          <div style={{ display: 'flex', gap: 10, marginTop: 12 }}>
-            {/* Show Return/Replacement Buttons if delivered */}
-            {((truckPosition >= trackingSteps.length - 1) || logs.some(l => /delivered/i.test(l.Remarks || l.Activity || ''))) && (
-              <>
-                <button
-                  onClick={() => {
-                    setRrType('Return');
-                    setShowRRModal(true);
-                    setRrErrorMsg('');
-                    setRrSuccessMsg('');
-                    setShowRRDropdown(false);
-                  }}
-                  style={{
-                    flex: 1,
-                    padding: '10px 14px',
-                    background: "#fff",
-                    color: "#1976d2",
-                    border: "2px solid #1976d2",
-                    borderRadius: 6,
-                    fontSize: 14,
-                    fontWeight: "600",
-                    cursor: "pointer",
-                    transition: 'all 0.2s',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = '#e3f2fd';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = '#fff';
-                  }}
-                >
-                  Return /Replacement
-                </button>
-             
-              </>
-            )}
+          <div style={{ display: "flex", gap: 10, marginTop: 12 }}>
+            {/* Show Return/Replacement Buttons if delivered (only when tracking data exists) */}
+            {hasTrackingData &&
+              ((truckPosition >= trackingSteps.length - 1) ||
+                logs.some((l) =>
+                  /delivered/i.test(l.Remarks || l.Activity || "")
+                )) && (
+                <>
+                  <button
+                    onClick={() => {
+                      setRrType("Return");
+                      setShowRRModal(true);
+                      setRrErrorMsg("");
+                      setRrSuccessMsg("");
+                      setShowRRDropdown(false);
+                    }}
+                    style={{
+                      flex: 1,
+                      padding: "10px 14px",
+                      background: "#fff",
+                      color: "#1976d2",
+                      border: "2px solid #1976d2",
+                      borderRadius: 6,
+                      fontSize: 14,
+                      fontWeight: "600",
+                      cursor: "pointer",
+                      transition: "all 0.2s",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = "#e3f2fd";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = "#fff";
+                    }}
+                  >
+                    Return /Replacement
+                  </button>
+                </>
+              )}
 
             <button
               onClick={() => (window.location.href = "mailto:support@store1920.com")}
               style={{
-                padding: '10px 14px',
+                padding: "10px 14px",
                 background: "#fff",
                 color: "#1976d2",
                 border: "2px solid #1976d2",
@@ -311,20 +385,21 @@ const TrackDeepOrder = () => {
                 fontSize: 14,
                 fontWeight: "600",
                 cursor: "pointer",
-                transition: 'all 0.2s',
-                whiteSpace: 'nowrap',
+                transition: "all 0.2s",
+                whiteSpace: "nowrap",
                 flex: 1,
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.background = '#e3f2fd';
+                e.currentTarget.style.background = "#e3f2fd";
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.background = '#fff';
+                e.currentTarget.style.background = "#fff";
               }}
             >
               Contact Support
             </button>
           </div>
+
           {errorMsg && (
             <div
               style={{
@@ -343,8 +418,11 @@ const TrackDeepOrder = () => {
           )}
         </div>
 
-        {/* Show tracking details if found */}
-        {orderDetails && orderDetails.AirWayBillNo && (
+        {/* ✅ Progress Bar should show if:
+              - has real tracking data (C3X)
+              - OR order exists in system but no tracking yet
+        */}
+        {(hasTrackingData || orderExistsOnly) && (
           <>
             {/* Tracking Progress Bar */}
             <div style={{ position: "relative", marginTop: 30, marginBottom: 30 }}>
@@ -363,9 +441,7 @@ const TrackDeepOrder = () => {
                 style={{
                   position: "absolute",
                   top: -18,
-                  left: `calc(${
-                    (truckPosition / (trackingSteps.length - 1)) * 100
-                  }% - 16px)`,
+                  left: `calc(${(truckPosition / (trackingSteps.length - 1)) * 100}% - 16px)`,
                   fontSize: 32,
                   transform: "rotate(0deg)",
                   transition: "left 1.5s ease-in-out",
@@ -414,7 +490,12 @@ const TrackDeepOrder = () => {
                 })}
               </div>
             </div>
+          </>
+        )}
 
+        {/* ✅ Shipment Details + Tracking History should show ONLY when real C3X tracking exists */}
+        {hasTrackingData && orderDetails && orderDetails.AirWayBillNo && (
+          <>
             {/* Shipment Info */}
             <div style={{ marginBottom: 30 }}>
               <h2 style={{ color: "#ff6d00", marginBottom: 15 }}>
@@ -432,9 +513,7 @@ const TrackDeepOrder = () => {
                     <td style={{ padding: 8, fontWeight: "bold" }}>
                       Air Waybill
                     </td>
-                    <td style={{ padding: 8 }}>
-                      {orderDetails.AirWayBillNo}
-                    </td>
+                    <td style={{ padding: 8 }}>{orderDetails.AirWayBillNo}</td>
                   </tr>
                   <tr>
                     <td style={{ padding: 8, fontWeight: "bold" }}>Origin</td>
@@ -450,9 +529,7 @@ const TrackDeepOrder = () => {
                     <td style={{ padding: 8, fontWeight: "bold" }}>
                       Weight (kg)
                     </td>
-                    <td style={{ padding: 8 }}>
-                      {orderDetails.ChargeableWeight}
-                    </td>
+                    <td style={{ padding: 8 }}>{orderDetails.ChargeableWeight}</td>
                   </tr>
                 </tbody>
               </table>
@@ -473,37 +550,16 @@ const TrackDeepOrder = () => {
                 >
                   <thead>
                     <tr>
-                      <th
-                        style={{
-                          borderBottom: "1px solid #ddd",
-                          padding: 8,
-                          textAlign: "left",
-                        }}
-                      >
+                      <th style={{ borderBottom: "1px solid #ddd", padding: 8, textAlign: "left" }}>
                         Date
                       </th>
-                      <th
-                        style={{
-                          borderBottom: "1px solid #ddd",
-                          padding: 8,
-                        }}
-                      >
+                      <th style={{ borderBottom: "1px solid #ddd", padding: 8 }}>
                         Time
                       </th>
-                      <th
-                        style={{
-                          borderBottom: "1px solid #ddd",
-                          padding: 8,
-                        }}
-                      >
+                      <th style={{ borderBottom: "1px solid #ddd", padding: 8 }}>
                         Location
                       </th>
-                      <th
-                        style={{
-                          borderBottom: "1px solid #ddd",
-                          padding: 8,
-                        }}
-                      >
+                      <th style={{ borderBottom: "1px solid #ddd", padding: 8 }}>
                         Remarks
                       </th>
                     </tr>
@@ -526,18 +582,35 @@ const TrackDeepOrder = () => {
               </div>
             )}
 
-            {/* Schedule Section */}
+            {/* RR banners */}
             <div>
-              {/* show banner if there is existing request */}
               {statusResults?.has_request && (
-                <div style={{ background: '#fff3e0', padding: 12, borderRadius: 8, marginBottom: 10, color: '#bf360c' }}>
-                  A return/replacement request already exists for this order. You can <strong>Check Return/Replacement Status</strong> below.
+                <div
+                  style={{
+                    background: "#fff3e0",
+                    padding: 12,
+                    borderRadius: 8,
+                    marginBottom: 10,
+                    color: "#bf360c",
+                  }}
+                >
+                  A return/replacement request already exists for this order. You can{" "}
+                  <strong>Check Return/Replacement Status</strong> below.
                 </div>
               )}
 
-              {/* show success message after submitting */}
               {rrSuccessMsg && (
-                <div style={{ background: '#e8f5e9', padding: 12, borderRadius: 8, marginBottom: 10, color: '#2e7d32' }}>{rrSuccessMsg}</div>
+                <div
+                  style={{
+                    background: "#e8f5e9",
+                    padding: 12,
+                    borderRadius: 8,
+                    marginBottom: 10,
+                    color: "#2e7d32",
+                  }}
+                >
+                  {rrSuccessMsg}
+                </div>
               )}
             </div>
           </>
@@ -547,15 +620,15 @@ const TrackDeepOrder = () => {
         {showRRModal && (
           <div
             style={{
-              position: 'fixed',
+              position: "fixed",
               left: 0,
               top: 0,
-              width: '100%',
-              height: '100%',
-              background: 'rgba(0,0,0,0.6)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
+              width: "100%",
+              height: "100%",
+              background: "rgba(0,0,0,0.6)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
               zIndex: 9999,
             }}
             onClick={() => setShowRRModal(false)}
@@ -565,26 +638,30 @@ const TrackDeepOrder = () => {
               onClick={(e) => e.stopPropagation()}
               style={{
                 width: 520,
-                maxWidth: '95%',
-                background: '#fff',
+                maxWidth: "95%",
+                background: "#fff",
                 borderRadius: 12,
                 padding: 18,
-                boxShadow: '0 10px 40px rgba(0,0,0,0.3)',
+                boxShadow: "0 10px 40px rgba(0,0,0,0.3)",
               }}
             >
               <h3 style={{ marginTop: 0 }}>Return / Replacement Request</h3>
-              <p style={{ color: '#666', marginTop: 0, marginBottom: 10 }}>
+              <p style={{ color: "#666", marginTop: 0, marginBottom: 10 }}>
                 Tracking: <strong>{orderDetails?.AirWayBillNo || orderId}</strong>
               </p>
 
               {rrErrorMsg && (
-                <div style={{ background: '#ffebee', color: '#c62828', padding: 8, borderRadius: 6, marginBottom: 10 }}>{rrErrorMsg}</div>
+                <div style={{ background: "#ffebee", color: "#c62828", padding: 8, borderRadius: 6, marginBottom: 10 }}>
+                  {rrErrorMsg}
+                </div>
               )}
               {rrSuccessMsg && (
-                <div style={{ background: '#e8f5e9', color: '#2e7d32', padding: 8, borderRadius: 6, marginBottom: 10 }}>{rrSuccessMsg}</div>
+                <div style={{ background: "#e8f5e9", color: "#2e7d32", padding: 8, borderRadius: 6, marginBottom: 10 }}>
+                  {rrSuccessMsg}
+                </div>
               )}
 
-              <div style={{ display: 'grid', gap: 8 }}>
+              <div style={{ display: "grid", gap: 8 }}>
                 <label style={{ fontWeight: 600 }}>Type</label>
                 <select value={rrType} onChange={(e) => setRrType(e.target.value)} style={{ padding: 8, borderRadius: 6 }}>
                   <option value="Return">Return</option>
@@ -592,7 +669,12 @@ const TrackDeepOrder = () => {
                 </select>
 
                 <label style={{ fontWeight: 600 }}>Reason</label>
-                <input value={rrReason} onChange={(e) => setRrReason(e.target.value)} placeholder="Reason (e.g. Damaged, Wrong Item)" style={{ padding: 8, borderRadius: 6 }} />
+                <input
+                  value={rrReason}
+                  onChange={(e) => setRrReason(e.target.value)}
+                  placeholder="Reason (e.g. Damaged, Wrong Item)"
+                  style={{ padding: 8, borderRadius: 6 }}
+                />
 
                 <label style={{ fontWeight: 600 }}>Comments</label>
                 <textarea value={rrComments} onChange={(e) => setRrComments(e.target.value)} rows={3} style={{ padding: 8, borderRadius: 6 }} />
@@ -601,19 +683,42 @@ const TrackDeepOrder = () => {
                 <input type="file" accept="image/*" multiple onChange={handleFilesChange} />
 
                 {rrImages.length > 0 && (
-                  <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 6 }}>
+                  <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 6 }}>
                     {rrImages.map((src, idx) => (
-                      <div key={idx} style={{ position: 'relative' }}>
-                        <img src={src} alt={`img-${idx}`} style={{ width: 100, height: 80, objectFit: 'cover', borderRadius: 6, border: '1px solid #ddd' }} />
-                        <button onClick={() => removeImage(idx)} style={{ position: 'absolute', right: -6, top: -6, background: '#fff', borderRadius: '50%', border: '1px solid #ccc', width: 26, height: 26, cursor: 'pointer' }}>×</button>
+                      <div key={idx} style={{ position: "relative" }}>
+                        <img src={src} alt={`img-${idx}`} style={{ width: 100, height: 80, objectFit: "cover", borderRadius: 6, border: "1px solid #ddd" }} />
+                        <button
+                          onClick={() => removeImage(idx)}
+                          style={{
+                            position: "absolute",
+                            right: -6,
+                            top: -6,
+                            background: "#fff",
+                            borderRadius: "50%",
+                            border: "1px solid #ccc",
+                            width: 26,
+                            height: 26,
+                            cursor: "pointer",
+                          }}
+                        >
+                          ×
+                        </button>
                       </div>
                     ))}
                   </div>
                 )}
 
-                <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
-                  <button onClick={submitReturnRequest} disabled={submittingRR} style={{ flex: 1, padding: 10, background: '#1976d2', color: '#fff', border: 'none', borderRadius: 8 }}>{submittingRR ? 'Submitting...' : 'Submit Request'}</button>
-                  <button onClick={() => setShowRRModal(false)} style={{ flex: 1, padding: 10, background: '#f1f1f1', border: 'none', borderRadius: 8 }}>Cancel</button>
+                <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
+                  <button
+                    onClick={submitReturnRequest}
+                    disabled={submittingRR}
+                    style={{ flex: 1, padding: 10, background: "#1976d2", color: "#fff", border: "none", borderRadius: 8 }}
+                  >
+                    {submittingRR ? "Submitting..." : "Submit Request"}
+                  </button>
+                  <button onClick={() => setShowRRModal(false)} style={{ flex: 1, padding: 10, background: "#f1f1f1", border: "none", borderRadius: 8 }}>
+                    Cancel
+                  </button>
                 </div>
               </div>
             </div>
@@ -621,49 +726,56 @@ const TrackDeepOrder = () => {
         )}
 
         {/* Return/Replacement Status Results */}
-        {statusResults && (
-          <div style={{ marginTop: 16, padding: 12, background: '#f7f9fc', borderRadius: 8 }}>
+        {statusResults && hasTrackingData && (
+          <div style={{ marginTop: 16, padding: 12, background: "#f7f9fc", borderRadius: 8 }}>
             {statusResults.has_request ? (
               <div>
                 <h4 style={{ marginTop: 0 }}>Requests</h4>
                 {statusResults.requests.map((r) => (
-                  <div key={r.id} style={{ padding: 10, border: '1px solid #e6e9ef', borderRadius: 8, marginBottom: 8 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                  <div key={r.id} style={{ padding: 10, border: "1px solid #e6e9ef", borderRadius: 8, marginBottom: 8 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
                       <strong>{r.request_type}</strong>
-                      <span style={{ fontSize: 13, color: '#555' }}>{new Date(r.request_date).toLocaleString()}</span>
+                      <span style={{ fontSize: 13, color: "#555" }}>
+                        {new Date(r.request_date).toLocaleString()}
+                      </span>
                     </div>
-                    <div style={{ color: '#333' }}>Reason: {r.reason}</div>
-                    <div style={{ marginTop: 6 }}>Status: <strong>{r.status}</strong></div>
+                    <div style={{ color: "#333" }}>Reason: {r.reason}</div>
+                    <div style={{ marginTop: 6 }}>
+                      Status: <strong>{r.status}</strong>
+                    </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div style={{ color: '#444' }}>No return/replacement requests found for this tracking number.</div>
+              <div style={{ color: "#444" }}>No return/replacement requests found for this tracking number.</div>
             )}
           </div>
         )}
 
-        {/* Show no tracking details message only after search */}
-        {/* Show no tracking details message only after search completes */}
-{hasSearched && !loading && !orderDetails && !errorMsg && (
-  <div
-    style={{
-      background: "#e3f2fd",
-      color: "#1976d2",
-      padding: "14px 16px",
-      borderRadius: 8,
-      marginTop: 20,
-      textAlign: "center",
-      fontSize: 15,
-      lineHeight: "1.6",
-    }}
-  >
-    ℹ️ Currently, we don’t have any tracking details for this shipment.
-    <br />
-    Details will be updated once received. Please check back again later.
-  </div>
-)}
-
+        {/* ✅ Show info message ONLY if:
+              - searched
+              - not loading
+              - no tracking data
+              - order does NOT exist
+        */}
+        {hasSearched && !loading && !hasTrackingData && !orderExistsOnly && !errorMsg && (
+          <div
+            style={{
+              background: "#e3f2fd",
+              color: "#1976d2",
+              padding: "14px 16px",
+              borderRadius: 8,
+              marginTop: 20,
+              textAlign: "center",
+              fontSize: 15,
+              lineHeight: "1.6",
+            }}
+          >
+            ℹ️ Currently, we don’t have any tracking details for this shipment.
+            <br />
+            Details will be updated once received. Please check back again later.
+          </div>
+        )}
 
         <style>
           {`

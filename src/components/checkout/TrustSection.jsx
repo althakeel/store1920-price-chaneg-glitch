@@ -20,9 +20,9 @@ const TrustSection = () => {
       {/* Delivery Guarantee */}
       <div className="trust-box">
         {/* Announcement Alert */}
-        <h3><strong>🌧️ Important Update:</strong></h3>
+        {/* <h3><strong>🌧️ Important Update:</strong></h3>
         <p> <strong> Due to ongoing rainy weather conditions, deliveries may
-           experience slight delays. Rest assured, your order is safe and protected </strong></p>
+           experience slight delays. Rest assured, your order is safe and protected </strong></p> */}
        
        
         <h3>🚚 Delivery Guarantee</h3>

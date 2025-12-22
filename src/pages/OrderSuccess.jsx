@@ -203,10 +203,10 @@ export default function OrderSuccess() {
           <div className="success-icon">✓</div>
           <h1 className="thank-you-title">Thank you</h1>
           <p className="thank-you-subtitle">Thank you. Your order has been received.</p>
-          <h3><strong>🌧️ Important Update:</strong></h3>
+          {/* <h3><strong>🌧️ Important Update:</strong></h3>
         <p> <strong>Due to ongoing rainy weather conditions, deliveries may
            experience slight delays. Rest assured, your order is safe and protected</strong>
-           </p>
+           </p> */}
           <br /><br />
           <button className="order-btn" onClick={() => navigate('/orders')}>
             Order no.
