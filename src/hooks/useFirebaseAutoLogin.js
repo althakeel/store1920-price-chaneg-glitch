@@ -1,41 +1,43 @@
-import { useEffect, useRef } from "react";
-import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "../utils/firebase";
+// import { useEffect, useRef } from "react";
+// import { onAuthStateChanged } from "firebase/auth";
+// import { auth } from "../utils/firebase";
 
-/**
- * Restores Firebase session on refresh.
- * ❌ NEVER calls backend
- */
-const useFirebaseAutoLogin = (onLogin) => {
-  const handled = useRef(false);
+// /**
+//  * Restores Firebase session on refresh.
+//  * ❌ NEVER calls backend
+//  */
+// const useFirebaseAutoLogin = (onLogin) => {
+//   const handled = useRef(false);
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+//   useEffect(() => {
+//     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
 
-      if (!firebaseUser) return;
-      if (handled.current) return;
+//       if (!firebaseUser) return;
+//       if (handled.current) return;
 
-      handled.current = true;
+//       handled.current = true;
 
-      const userInfo = {
-        id: firebaseUser.uid,
-        name:
-          firebaseUser.displayName ||
-          firebaseUser.email.split("@")[0],
-        email: firebaseUser.email,
-        token: localStorage.getItem("token") || "firebase-only",
-        image: firebaseUser.photoURL,
-        photoURL: firebaseUser.photoURL,
-        firebaseUid: firebaseUser.uid,
-      };
+//       const userInfo = {
+//         id: firebaseUser.uid,
+//         name:
+//           firebaseUser.displayName ||
+//           firebaseUser.email.split("@")[0],
+//         email: firebaseUser.email,
+//         token: localStorage.getItem("token") || "firebase-only",
+//         image: firebaseUser.photoURL,
+//         photoURL: firebaseUser.photoURL,
+//         firebaseUid: firebaseUser.uid,
+//       };
 
-      onLogin?.(userInfo);
+//       onLogin?.(userInfo);
 
-      console.log("Firebase session restored (no backend call)");
-    });
+//       console.log("Firebase session restored (no backend call)");
+//     });
 
-    return () => unsubscribe();
-  }, [onLogin]);
-};
+//     return () => unsubscribe();
+//   }, [onLogin]);
+// };
 
-export default useFirebaseAutoLogin;
+// export default useFirebaseAutoLogin;
+
+export default () => {};
