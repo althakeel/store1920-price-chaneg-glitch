@@ -1,74 +1,37 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../utils/firebase";
-import axios from "axios";
 
+/**
+ * Restores Firebase session on refresh.
+ * ❌ NEVER calls backend
+ */
 const useFirebaseAutoLogin = (onLogin) => {
+  const handled = useRef(false);
+
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        console.log('Firebase user detected:', firebaseUser.email);
-        
-        // Extract user details from Firebase
-        const userData = {
-          email: firebaseUser.email,
-          name: firebaseUser.displayName || firebaseUser.email.split('@')[0],
-          firebaseUid: firebaseUser.uid,
-          photoURL: firebaseUser.photoURL,
-        };
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
 
-        try {
-          // Try to sync with WordPress
-          const res = await axios.post(
-            "https://db.store1920.com/wp-json/custom/v1/google-login",
-            {
-              email: userData.email,
-              name: userData.name,
-              firebase_uid: userData.firebaseUid,
-              photo_url: userData.photoURL,
-            }
-          );
+      if (!firebaseUser) return;
+      if (handled.current) return;
 
-          const userInfo = {
-            id: res.data.id || res.data.user_id,
-            name: userData.name,
-            email: userData.email,
-            token: res.data.token,
-            image: userData.photoURL,
-            photoURL: userData.photoURL,
-            firebaseUid: userData.firebaseUid,
-          };
+      handled.current = true;
 
-          localStorage.setItem("token", userInfo.token);
-          localStorage.setItem("userId", userInfo.id);
-          localStorage.setItem("email", userInfo.email);
+      const userInfo = {
+        id: firebaseUser.uid,
+        name:
+          firebaseUser.displayName ||
+          firebaseUser.email.split("@")[0],
+        email: firebaseUser.email,
+        token: localStorage.getItem("token") || "firebase-only",
+        image: firebaseUser.photoURL,
+        photoURL: firebaseUser.photoURL,
+        firebaseUid: firebaseUser.uid,
+      };
 
-          onLogin?.(userInfo);
-          console.log('Auto-login successful with WordPress sync');
-        } catch (error) {
-          console.warn('WordPress sync failed, using Firebase data only:', error);
-          
-          // Fallback: use Firebase data only
-          const userInfo = {
-            id: userData.firebaseUid,
-            name: userData.name,
-            email: userData.email,
-            token: 'firebase-only',
-            image: userData.photoURL,
-            photoURL: userData.photoURL,
-            firebaseUid: userData.firebaseUid,
-          };
+      onLogin?.(userInfo);
 
-          localStorage.setItem("userId", userInfo.id);
-          localStorage.setItem("email", userInfo.email);
-          localStorage.setItem("token", userInfo.token);
-
-          onLogin?.(userInfo);
-          console.log('Auto-login successful with Firebase only');
-        }
-      } else {
-        console.log('No Firebase user detected');
-      }
+      console.log("Firebase session restored (no backend call)");
     });
 
     return () => unsubscribe();

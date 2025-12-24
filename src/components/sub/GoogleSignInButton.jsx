@@ -7,7 +7,7 @@ import GoogleIcon from "../../assets/images/search.png";
 
 /**
  * 🔒 GLOBAL LOCK
- * This survives re-renders, remounts, modals, headers, etc.
+ * Prevents duplicate login attempts across the entire app
  */
 let GOOGLE_LOGIN_IN_PROGRESS = false;
 
@@ -16,21 +16,17 @@ const GoogleSignInButton = ({ onLogin }) => {
   const [loading, setLoading] = useState(false);
 
   const handleGoogleSignIn = async () => {
-    // 🚫 Block ALL concurrent attempts
-    if (GOOGLE_LOGIN_IN_PROGRESS) {
-      console.warn("Google login already in progress — blocked");
-      return;
-    }
+    if (GOOGLE_LOGIN_IN_PROGRESS) return;
 
     GOOGLE_LOGIN_IN_PROGRESS = true;
     setLoading(true);
 
     try {
-      // 1️⃣ Firebase popup
+      // 1️⃣ Firebase popup login
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
 
-      // 2️⃣ Send to WordPress (single request only)
+      // 2️⃣ ONE backend sync (never again)
       const res = await axios.post(
         "https://db.store1920.com/wp-json/custom/v1/google-login",
         {
@@ -39,41 +35,37 @@ const GoogleSignInButton = ({ onLogin }) => {
           firebase_uid: user.uid,
           photo_url: user.photoURL,
         },
-        {
-          timeout: 10000,
-        }
+        { timeout: 10000 }
       );
 
-      // 3️⃣ Build user session
       const userInfo = {
-        id: res.data.id || res.data.user_id || user.uid,
+        id: res.data.id || user.uid,
         name: user.displayName,
         email: user.email,
         token: res.data.token || "firebase-only",
         image: user.photoURL,
+        photoURL: user.photoURL,
         firebaseUid: user.uid,
       };
 
-      // 4️⃣ Persist
+      // 3️⃣ Persist session
       localStorage.setItem("token", userInfo.token);
       localStorage.setItem("userId", userInfo.id);
       localStorage.setItem("email", userInfo.email);
 
-      // 5️⃣ Update app auth
+      // 4️⃣ Update app state
       login(userInfo);
       onLogin?.(userInfo);
 
     } catch (err) {
-      // ⚠️ Handle rate-limit gracefully
       if (err?.response?.status === 429) {
         alert("Please wait a few seconds and try again.");
-        return;
+      } else {
+        console.error("Google login failed:", err);
+        alert("Login failed. Please try again.");
       }
-
-      console.error("Google sign-in failed:", err);
-      alert("Google sign-in failed. Please try again.");
     } finally {
-      // ⏱️ IMPORTANT: delay unlock (matches backend transient)
+      // ⏱️ Delay unlock to match backend protection
       setTimeout(() => {
         GOOGLE_LOGIN_IN_PROGRESS = false;
         setLoading(false);
@@ -92,12 +84,7 @@ const GoogleSignInButton = ({ onLogin }) => {
         cursor: loading ? "not-allowed" : "pointer",
       }}
     >
-      <img
-        src={GoogleIcon}
-        alt="Google Sign In"
-        width={24}
-        height={24}
-      />
+      <img src={GoogleIcon} alt="Google Sign In" width={24} height={24} />
     </button>
   );
 };
