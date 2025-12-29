@@ -4,24 +4,24 @@
 // import Logo4 from '../assets/images/theme/Purple 2@6x.png';
 // import Logo5 from '../assets/images/theme/banner/HAlloween Logo V1.png';
 // import Logo6 from '../assets/images/theme/Asset 1@4x.png';
-// import Logo8 from "../assets/images/theme/theme6/Main-08-12-25.webp";
-import Logo9 from "../assets/images/theme/theme6/main-23-25.webp";
+import Logo8 from "../assets/images/theme/theme6/Main-08-12-25.webp";
+// import Logo9 from "../assets/images/theme/theme6/main-23-25.webp";
 // import banner1 from '../assets/images/theme/banner/Banners Yellow.webp';
 // import banner2 from '../assets/images/theme/banner/Banners-Sky-blue.webp';
 // import banner3 from '../assets/images/theme/banner/Banners-orange-2.webp';
 // import banner4 from '../assets/images/theme/banner/Banners-purple-2.webp';
 // import banner5 from '../assets/images/theme/banner/Banners Halloween 2.webp';
 // import banner6 from '../assets/images/theme/banner/Bannersmorron.webp';
-import Banner10 from "../assets/images/theme/theme6/main-23-25.webp";
+import Banner10 from "../assets/images/theme/theme6/Main-08-12-25.webp";
 
 export const themes = {
   1: {
-    logo: Logo9,
+    logo: Logo8,
     navbarBg: "#042232",
     bannerKey: Banner10,
-    bannerBg: "#6E0001",
+    bannerBg: "#0E9672",
     lightningBanner: {
-      backgroundColor: "#6E0001",
+      backgroundColor: "#0E9672",
       textColor: "#000000",
     },
   },
