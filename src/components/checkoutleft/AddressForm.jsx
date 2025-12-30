@@ -18,19 +18,27 @@ const LOCAL_STORAGE_KEY = 'checkoutAddressData';
 
 //   return digits;
 // };
-
+// Keep digits only (DON'T cut to 9 here, warna 971 type karte hi truncate hoga)
 const normalizePhone = (value) => {
   if (!value) return "";
+  return value.replace(/\D/g, "");
+};
 
-  let digits = value.replace(/\D/g, "");
+// For saving: convert to local UAE format (9 digits) without 971 / 0
+const normalizePhoneForSave = (value) => {
+  let digits = (value || "").toString().replace(/\D/g, "");
 
-  // Allow only 9 digits max
+  if (digits.startsWith("971")) digits = digits.slice(3);
+  if (digits.startsWith("0")) digits = digits.slice(1);
+
   return digits.slice(0, 9);
 };
 
 
+
 const UAE_EMIRATES = [
   { code: 'AUH', name: 'Abu Dhabi' },
+  { code: 'AAN', name: 'Al Ain' },
   { code: 'DXB', name: 'Dubai' },
   { code: 'SHJ', name: 'Sharjah' },
   { code: 'AJM', name: 'Ajman' },
@@ -54,7 +62,7 @@ const UAE_CITIES = {
 const AddressForm = ({ formData, onChange, onSubmit, onClose, saving, error, cartItems }) => {
   const [formErrors, setFormErrors] = useState({});
   const [markerPosition, setMarkerPosition] = useState(null);
-  const [mapSelected, setMapSelected] = useState(false);
+  const [mapSelected, setMapSelected] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
 
@@ -133,23 +141,35 @@ const AddressForm = ({ formData, onChange, onSubmit, onClose, saving, error, car
   const validateField = (name, value) => {
     switch (name) {
       case 'first_name':
-      case 'last_name':
       case 'street':
       case 'city':
       case 'state':
         if (!value || value.trim() === '') return 'This field is required';
         break;
-      case 'delivery_type':
-        if (!value || value.trim() === '') return 'Please select delivery type';
-        break;
+     
       case 'phone_number':
         if (!value || value.trim() === '') return 'Phone number is required';
         // Accept exactly 7 digits for the phone number field
-        if (!/^[0-9]{9}$/.test(value)) return 'Invalid phone number';
+        if (!/^[0-9]{9}$/.test(value)) return 'Mobile No must start with 5 (example: 501234567)';
         break;
       case 'email':
         if (!value || !/\S+@\S+\.\S+/.test(value)) return 'Invalid email';
         break;
+        case 'phone_number': {
+        const digits = (value || "").toString().replace(/\D/g, "");
+
+        if (!digits) return 'Phone number is required';
+
+        // If user typed 971 or 0 - show clear error (don't auto-remove in input)
+        if (digits.startsWith("971")) return 'Do not type 971. Start with 5 (e.g., 501234567)';
+        if (digits.startsWith("0")) return 'Do not start with 0. Start with 5 (e.g., 501234567)';
+
+        if (digits[0] !== "5") return 'Number must start with 5 (e.g., 501234567)';
+        if (digits.length !== 9) return 'Must be exactly 9 digits (e.g., 501234567)';
+
+        break;
+      }
+
       default:
         return '';
     }
@@ -199,15 +219,16 @@ const AddressForm = ({ formData, onChange, onSubmit, onClose, saving, error, car
     // const phone = (formData.shipping.phone_number || '').toString().trim();
   
 
-    const raw = formData.shipping.phone_number || "";
-    const phone = normalizePhone(raw);
+            const raw = formData.shipping.phone_number || "";
+            const phone = normalizePhoneForSave(raw);
 
-            if (!/^[0-9]{9}$/.test(phone)) {
-              alert("Please enter a valid UAE mobile number.");
-              setFormErrors((prev) => ({ ...prev, phone_number: "Invalid number" }));
+            if (!/^[5][0-9]{8}$/.test(phone)) {
+              alert("Please enter a valid UAE mobile number starting with 5 (e.g., 501234567).");
+              setFormErrors((prev) => ({ ...prev, phone_number: "Number must start with 5 and be 9 digits" }));
               setIsSubmitting(false);
               return;
             }
+
 
             const fullPhone = `+971${phone}`;
 
@@ -223,7 +244,7 @@ const AddressForm = ({ formData, onChange, onSubmit, onClose, saving, error, car
     }
 
     const errors = {};
-    const requiredFields = ['first_name', 'last_name', 'email', 'phone_number', 'street', 'state', 'city', 'delivery_type'];
+    const requiredFields = ['first_name', 'email', 'phone_number', 'street', 'state', 'city'];
     requiredFields.forEach((field) => {
       const errorMsg = validateField(field, formData.shipping[field]);
       if (errorMsg) errors[field] = errorMsg;
@@ -304,6 +325,14 @@ const AddressForm = ({ formData, onChange, onSubmit, onClose, saving, error, car
           boxShadow: '0 8px 40px #0003',
         }}
       >
+        {/* 🔑 Hidden map – REQUIRED for Google Places (DO NOT REMOVE) */}
+      <div style={{ display: 'none' }}>
+        <CustomMap
+          initialPosition={markerPosition}
+          onPlaceSelected={handlePlaceSelected}
+        />
+      </div>
+
         <button
           onClick={onClose}
           style={{
@@ -390,9 +419,9 @@ const AddressForm = ({ formData, onChange, onSubmit, onClose, saving, error, car
                         }
                       }
                     `}</style>
-                    <div className="address-map-area address-modal-map-container" style={{ width: '100%', height: '100%' }}>
-                      <CustomMap initialPosition={markerPosition} onPlaceSelected={handlePlaceSelected} />
-                    </div>
+                    {/* Map is mounted but hidden – required for Google Places */}
+             
+
                   </div>
                 </div>
               )}
@@ -414,7 +443,7 @@ const AddressForm = ({ formData, onChange, onSubmit, onClose, saving, error, car
               >
                 <div style={{ display: 'flex', alignItems: 'center', marginBottom: 18 }}>
                   <div style={{ fontWeight: 700, color: '#444', fontSize: '1.1rem', letterSpacing: 0.2, flex: 1 }}>SHIPPING ADDRESS</div>
-                  <button
+                  {/* <button
                     type="button"
                     onClick={() => setMapSelected(false)}
                     style={{
@@ -431,148 +460,95 @@ const AddressForm = ({ formData, onChange, onSubmit, onClose, saving, error, car
                     tabIndex={0}
                   >
                     ← Back to Map
-                  </button>
+                  </button> */}
                 </div>
                 {mapSelected && (
                     <form onSubmit={saveAddress} noValidate style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '18px' }}>
               {/* Delivery Type Selector at the top of the form */}
-              <div style={{ margin: '0 0 18px 0', gridColumn: '1 / -1' }}>
-                <div style={{ fontWeight: 600, color: '#444', marginBottom: 8 }}>Delivery Type<span style={{ color: 'red' }}>*</span></div>
-                <style>{`
-                  @media (max-width: 600px) {
-                    .delivery-type-group {
-                      flex-direction: column !important;
-                      gap: 10px !important;
-                    }
-                    .delivery-type-radio {
-                      width: 100% !important;
-                      justify-content: flex-start !important;
-                      padding: 12px 10px !important;
-                      font-size: 1.08rem !important;
-                    }
-                  }
-                `}</style>
-                <div className="delivery-type-group" style={{ display: 'flex', gap: '16px' }}>
-                  {['Office', 'Home', 'Apartment'].map((type) => (
-                    <label
-                      key={type}
-                      className="delivery-type-radio"
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        cursor: 'pointer',
-                        border: formData.shipping.delivery_type === type ? '2px solid #ff5100' : '2px solid #eee',
-                        background: formData.shipping.delivery_type === type ? '#fff6f0' : '#fafbfc',
-                        borderRadius: 10,
-                        padding: '10px 22px',
-                        fontWeight: 500,
-                        color: formData.shipping.delivery_type === type ? '#ff5100' : '#444',
-                        boxShadow: formData.shipping.delivery_type === type ? '0 2px 8px #ff510033' : 'none',
-                        transition: 'all 0.2s',
-                        fontSize: '1rem',
-                        width: 'auto',
-                        justifyContent: 'center',
-                      }}
-                    >
-                      <input
-                        type="radio"
-                        name="delivery_type"
-                        value={type}
-                        checked={formData.shipping.delivery_type === type}
-                        onChange={handleFieldChange}
-                        style={{ marginRight: 8, accentColor: '#ff5100', width: 18, height: 18 }}
-                      />
-                      {type}
-                    </label>
-                  ))}
-                </div>
-                {/* Delivery time info below selector */}
-                {formData.shipping.delivery_type && (
-                  <div style={{ marginTop: 8, color: '#1976d2', fontWeight: 500, fontSize: '1.05rem' }}>
-                    {formData.shipping.delivery_type === 'Office' && 'Delivery Time: 9 am to 6 pm'}
-                    {formData.shipping.delivery_type === 'Home' && 'Delivery Time: 9 am to 9 pm'}
-                    {formData.shipping.delivery_type === 'Apartment' && 'Delivery Time: 9 am to 9 pm'}
-                  </div>
-                )}
-                {formErrors.delivery_type && <div style={{ color: 'red', fontSize: '0.95em', marginTop: 4 }}>{formErrors.delivery_type}</div>}
-              </div>
+        
 
               <label>
-                First Name*
-                <input type="text" name="first_name" value={formData.shipping.first_name} onChange={handleFieldChange} />
+                Full Name*
+                <input placeholder='Full Name' type="text" name="first_name" value={formData.shipping.first_name} onChange={handleFieldChange} />
                 {formErrors.first_name && <span style={{ color: 'red' }}>{formErrors.first_name}</span>}
               </label>
 
-              <label>
+              {/* <label>
                 Last Name*
-                <input type="text" name="last_name" value={formData.shipping.last_name} onChange={handleFieldChange} />
+                <input placeholder='Last Name' type="text" name="last_name" value={formData.shipping.last_name} onChange={handleFieldChange} />
                 {formErrors.last_name && <span style={{ color: 'red' }}>{formErrors.last_name}</span>}
-              </label>
+              </label> */}
 
-        <label>
-  Mobile Number*
-  <div className="phone-wrapper" style={{ marginTop: 4 }}>
+                    <label>
+                      Mobile Number*
+              <div className="phone-wrapper" style={{ marginTop: 4 }}>
 
-    {/* UAE Flag + Prefix inside input */}
-    <span className="phone-prefix">
-      +971
-    </span>
+                {/* UAE Flag + Prefix inside input */}
+                <span className="phone-prefix">
+                  +971
+                </span>
 
-    <input
-      type="text"
-      name="phone_number"
-      className="phone-input"
-      value={formData.shipping.phone_number || ""}
-      onChange={(e) => {
-        const clean = normalizePhone(e.target.value);
-        onChange(
-          { target: { name: "phone_number", value: clean } },
-          "shipping"
-        );
+                <input
+                  type="text"
+                  name="phone_number"
+                  className="phone-input"
+                  value={formData.shipping.phone_number || ""}
+                onChange={(e) => {
+                    const digits = normalizePhone(e.target.value);
 
-        const errorMsg = /^[0-9]{9}$/.test(clean)
-          ? ""
-          : "Must be 9 digits";
-        setFormErrors((prev) => ({ ...prev, phone_number: errorMsg }));
-      }}
-      maxLength={9}
-      inputMode="numeric"
-      pattern="[0-9]*"
-      placeholder="501234567"
-      style={{
-        width: "100%",
-        padding: "10px 12px",
-        paddingLeft: "70px",
-        borderRadius: 6,
-        border: "1px solid #ccc",
-        fontSize: "1rem",
-      }}
-    />
-  </div>
+                    // IMPORTANT:
+                    // - Agar user 971 ya 0 type kare, hum truncate/strip nahi karenge (taake user confuse na ho)
+                    // - Agar user 5 se start kare, tab hum 9 digits max allow karenge
+                    const nextValue = digits.startsWith("5") ? digits.slice(0, 9) : digits;
 
-  {formErrors.phone_number && (
-    <span style={{ color: "red" }}>{formErrors.phone_number}</span>
-  )}
-</label>
+                    onChange(
+                      { target: { name: "phone_number", value: nextValue } },
+                      "shipping"
+                    );
+
+                    const errorMsg = validateField("phone_number", nextValue);
+                    setFormErrors((prev) => ({ ...prev, phone_number: errorMsg }));
+                  }}
+                  maxLength={12}
+
+              
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  placeholder="501234567"
+                  style={{
+                    width: "100%",
+                    padding: "10px 12px",
+                    paddingLeft: "70px",
+                    borderRadius: 6,
+                    border: "1px solid #ccc",
+                    fontSize: "1rem",
+                  }}
+                />
+              </div>
+
+              {formErrors.phone_number && (
+                <span style={{ color: "red" }}>{formErrors.phone_number}</span>
+              )}
+            </label>
 
 
 
 
               <label style={{ display: 'flex', flexDirection: 'column', fontWeight: 500, color: '#444' }}> 
                 Email*
-                <input type="email" name="email" value={formData.shipping.email} onChange={handleFieldChange} 
+                <input placeholder='Email' type="email" name="email" value={formData.shipping.email} onChange={handleFieldChange} 
                   style={{ marginTop: '6px', padding: '10px', fontSize: '1rem', borderRadius: '6px', border: '1px solid #ccc' }} />
                 {formErrors.email && <span style={{ color: 'red', fontSize: '0.85rem' }}>{formErrors.email}</span>} 
               </label>
                 <label>
-                Apartment No*
-                <input type="text" name="apartment" value={formData.shipping.apartment} onChange={handleFieldChange} />
+                Apartment/House/Office No*
+                <input placeholder='Apartment/House/Office No' type="text" name="apartment" value={formData.shipping.apartment} onChange={handleFieldChange} />
               </label>
 
               <label>
                 Building Name / Street*
-                <input type="text" name="street" value={formData.shipping.street} onChange={handleFieldChange} />
+                <input placeholder=' Building Name / Street*' type="text" name="street" value={formData.shipping.street} onChange={handleFieldChange} />
                 {formErrors.street && <span style={{ color: 'red' }}>{formErrors.street}</span>}
               </label>
 

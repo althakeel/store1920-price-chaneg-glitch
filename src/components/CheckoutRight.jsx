@@ -90,7 +90,6 @@ export default function CheckoutRight({ cartItems, formData, createOrder, clearC
 
   const requiredFields = [
     'first_name',
-    'last_name',
     'email',
     'phone_number',
     'street',
@@ -117,7 +116,6 @@ export default function CheckoutRight({ cartItems, formData, createOrder, clearC
         order_id: orderId,
         customer: {
           first_name: customer.first_name,
-          last_name: customer.last_name,
           email: customer.email,
           phone_number: customer.phone_number,
         },
@@ -150,7 +148,6 @@ export default function CheckoutRight({ cartItems, formData, createOrder, clearC
       if (formData.paymentMethod === 'stripe') {
         const normalized = {
           first_name: shippingOrBilling.first_name || 'First',
-          last_name: shippingOrBilling.last_name || 'Last',
           email: shippingOrBilling.email || 'customer@example.com',
         };
 
@@ -187,7 +184,6 @@ export default function CheckoutRight({ cartItems, formData, createOrder, clearC
 
   const normalized = {
     first_name: shippingOrBilling.first_name || 'First',
-    last_name:  shippingOrBilling.last_name  || 'Last',
     email:      shippingOrBilling.email      || 'customer@example.com',
     phone_number: fullPhone
   };
@@ -254,7 +250,6 @@ export default function CheckoutRight({ cartItems, formData, createOrder, clearC
       if (['paymob', 'card'].includes(formData.paymentMethod)) {
         const normalized = {
           first_name: shippingOrBilling.first_name?.trim() || 'First',
-          last_name: shippingOrBilling.last_name?.trim() || 'Last',
           email:
             shippingOrBilling.email?.trim() ||
             formData.billing?.email ||
