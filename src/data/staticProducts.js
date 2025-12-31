@@ -241,7 +241,7 @@ const staticProducts = [
         id: 523374,
         productName: "68V Cordless Portable Car Wash Pressur",
         discount: 10,
-        price: 158.00,
+        price: 159.00,
         originalPrice: 189.8,
         note: "Perfect for you & a friend",
         mostPopular: true,
@@ -252,7 +252,7 @@ const staticProducts = [
         id: 523376,
         productName: "68V Cordless Portable Car Wash Pressur",
         discount: 25,
-        price: 196.00,
+        price: 199.00,
         originalPrice: 209.7,
         note: "Get 25% OFF",
         image: Product3,
@@ -397,7 +397,7 @@ const staticProducts = [
     id: 522826,
     name: "Twin Size Air Mattress with Built-in Rechargeable Pump – 16 Self-Inflating Blow Up Bed for Home, Camping & Guests",
     slug: "twin-size-air-mattress-with-built-in-rechargeable-pump-16-self-inflating-blow-up-bed-for-home-camping-guests",
-    price: 174.00,
+    price: 179.00,
     description: "Sleep Comfortably, Anywhere, Anytime",
     shortdesc:
       " Experience the perfect balance of support and convenience with the Single -Size Air Mattress. Whether for guests at home, camping trips, or outdoor adventures — enjoy restful sleep with the touch of a button.",
@@ -427,7 +427,7 @@ const staticProducts = [
         name: "twin-size-air-matt",
         label: "Buy 1 for Only 174 AED",
         discount: 54, // (300 - 139) / 300 * 100 = 53.67% ≈ 54%
-        price: 174.00, // total after discount
+        price: 179.00, // total after discount
         originalPrice: 300, // original single-item price
         image: Product24,
         note: "Dimensions: 190 cm (L) × 100 cm (W) × 40 cm (H)",
@@ -438,7 +438,7 @@ const staticProducts = [
         name: "twin-size-air-matt",
         label: "Dimensions: 190 cm (L) × 100 cm (W) × 40 cm (H)",
         discount: 35, // (600 - 250.2) / 600 * 100 = 58.3% ≈ 58%
-        price: 248.00, // total after discount
+        price: 249.00, // total after discount
         originalPrice: 690, // 300 * 2
         note: "Dimensions: 200 cm (L) × 150 cm (W) × 40 cm (H)",
         mostPopular: true,
@@ -654,7 +654,7 @@ const staticProducts = [
         name: "Electric Paint Sprayer",
         label: "Buy 1 for Only 85 AED",
         discount: 0,
-        price: 113.00,
+        price: 114.90,
         originalPrice: 250,
         image: Product41,
       },
@@ -664,7 +664,7 @@ const staticProducts = [
         name: "Electric Paint Sprayer",
         label: "Buy 2 & Get 10% Off",
         discount: 10,
-        price: 212.00,
+        price: 209.00,
         originalPrice: 500,
         note: "Perfect for you & a friend",
         mostPopular: true,
@@ -676,7 +676,7 @@ const staticProducts = [
         name: "Electric Paint Sprayer",
         label: "Buy 3 & Get 20% Off",
         discount: 20,
-        price: 282.00,
+        price: 279.00,
         originalPrice: 750,
         note: "Best Value",
         image: Product24,
@@ -836,7 +836,7 @@ const staticProducts = [
     id: 523089,
     name: "TrimPro™ 21V Cordless Electric Pruning Shears",
     slug: "trimpro-21v-cordless-electric-pruning-shears",
-    price: 138.00,
+    price: 139.00,
     description: "Paint Like a Pro – Anywhere, Anytime",
     shortdesc:
       "Save time and effort with our upgraded electric pruning shears. Built for gardeners, orchard owners, and farm workers who need sharp, powerful, and safe tools. ",
@@ -874,7 +874,7 @@ const staticProducts = [
         name: "TrimPro™ 21V Cordless Electric",
         label: "Buy 1 for Only 138 AED",
         discount: 0,
-        price: 138.00,
+        price: 139.00,
         originalPrice: 280,
         image: Product53,
       },
@@ -884,8 +884,8 @@ const staticProducts = [
         name: "TrimPro™ 21V Cordless Electric",
         label: "Buy 2 & Get 15% Off",
         discount: 15,
-        price: 231.50, // 109.9 * 2 * 0.85 ≈ 186.42
-        originalPrice: 560, // 109.9 * 2
+        price: 229.00, // 109.9 * 2 * 0.85 ≈ 186.42
+        originalPrice: 540, // 109.9 * 2
         note: "Perfect for you & a friend",
         mostPopular: true,
         image: Product61,
@@ -896,8 +896,8 @@ const staticProducts = [
         name: "TrimPro™ 21V Cordless Electric",
         label: "Buy 3 & Get 25% Off",
         discount: 25,
-        price: 306.50, // 109.9 * 3 * 0.75 ≈ 247.43
-        originalPrice: 1140, // 109.9 * 3
+        price: 299.00, // 109.9 * 3 * 0.75 ≈ 247.43
+        originalPrice: 999, // 109.9 * 3
         note: "Best Value",
         image: Product68,
       },
@@ -1005,7 +1005,7 @@ const staticProducts = [
     id: 523106,
     name: "GameBox 64 Retro Console – 20,000+ Preloaded Games with 4K HDMI & Wireless Controllers",
     slug: "gamebox-64-retro-console-20000-preloaded-games-4k-hdmi-wireless-controllers",
-    price: 88.00,
+    price: 89.00,
     description: "Turn Your TV into the Ultimate Retro Gaming Console",
     shortdesc:
       " 20,000+ classic games | 64GB storage | Plug & Play | Stunning 4K visuals ",
@@ -1035,7 +1035,7 @@ const staticProducts = [
         name: "GameBox 64 Retro Console",
         label: "Buy 1 for Only 88 AED",
         discount: 0,
-        price: 88.00,
+        price: 89.00,
         originalPrice: 89.99,
         image: Product73,
       },
@@ -1056,7 +1056,7 @@ const staticProducts = [
         id: 523396,
         name: "GameBox 64 Retro Console",
         label: "Buy 3 & Get 25% Off",
-        discount: 25,
+        discount: 0,
         price: 198.00, // ≈ 157.28 AED
         originalPrice: +(69.9 * 3).toFixed(2),
         note: "Best Value",
@@ -1350,12 +1350,12 @@ const staticProducts = [
         image: Product96,
       },
       {
-        type: "Bundle of 2",
+        type: "Bundle eeof 2",
         id: 523417,
         name: "Cordless 2-in-1 Leaf Blower & Vacuum",
         label: "Buy 2 & Get 15% Off",
         discount: 15,
-        price: 118.50, // 15% off on 2 items
+        price: 119.0, // 15% off on 2 items
         originalPrice: 378, // 139.80 AED
         note: "Perfect for you & a friend",
         mostPopular: true,
@@ -1367,7 +1367,7 @@ const staticProducts = [
         name: "Cordless 2-in-1 Leaf Blower & Vacuum",
         label: "Buy 3 & Get 25% Off",
         discount: 25,
-        price: 156.50, // 25% off on 3 items
+        price: 156.00, // 25% off on 3 items
         originalPrice: 567, // 269.70 AED
         note: "Best Value",
         image: Product93,
@@ -1480,7 +1480,7 @@ const staticProducts = [
     id: 523759,
     name: "Turbo Cordless Leaf Blower – 21V Power for Every Task",
     slug: "turbo-cordless-leaf-blower-21v-power-for-every-task",
-    price: 62.50,
+    price: 64.90,
     description:
       "Lightweight | Powerful Turbine Motor | Dual Battery Option | Adjustable Speed",
     shortdesc:
@@ -1512,7 +1512,7 @@ const staticProducts = [
         name: "Turbo Cordless Leaf Blower – 21V Power for Every Task - Single Battery",
         label: "Ideal for quick cleanups & small areas.",
         discount: 27,
-        price: 62.50,
+        price: 64.90,
         originalPrice: 99.98,
         image: Products118,
       },
@@ -1523,7 +1523,7 @@ const staticProducts = [
         label:
           "Extended runtime for large spaces & heavy use. Each battery is 21V large-capacity lithium, offering efficient, long-lasting power.",
         discount: 38,
-        price: 75.50,
+        price: 79.00,
         originalPrice: 129.0,
         note: "",
         mostPopular: true,
@@ -1638,7 +1638,7 @@ const staticProducts = [
     id: 523794,
     name: "Steam Cleaner DF-A001 – Japan Technology",
     slug: "steam-cleaner-df-a001-japan-technology",
-    price: 112.50,
+    price: 99.0,
     description:
       "Powerful 1000W | Multi-Surface Cleaning | Portable & Chemical-Free",
     shortdesc:
@@ -1669,7 +1669,7 @@ const staticProducts = [
         name: "Steam Cleaner DF-A001 – Japan Technology",
         label: "Buy 1 for Only 112.50 AED",
         discount: 0,
-        price: 112.50,
+        price: 99.00,
         originalPrice: 89.9,
         image: Product136,
       },
@@ -1679,7 +1679,7 @@ const staticProducts = [
         name: "Steam Cleaner DF-A001 – Japan Technology",
         label: "Buy 2 & Get 10% Off",
         discount: 10,
-        price: 200.00, // 10% off on total 179.8
+        price: 169.00, // 10% off on total 179.8
         originalPrice: 179.8,
         note: "Perfect for you & a friend",
         mostPopular: true,
@@ -1691,7 +1691,7 @@ const staticProducts = [
         name: "Steam Cleaner DF-A001 – Japan Technology",
         label: "Buy 3 & Get 25% Off",
         discount: 25,
-        price: 250.00, // 25% off on total 269.7
+        price: 225.00, // 25% off on total 269.7
         originalPrice: 269.7,
         note: "Best Value",
         image: Product142,
@@ -1784,7 +1784,7 @@ const staticProducts = [
     id: 523794,
     name: "Electric Grape & Garlic Peeling Machine",
     slug: "electric-grape-garlic-peeling-machine",
-    price: 112.00,
+    price: 99.00,
     description:
       "USB Rechargeable | Multi-Food Prep | Fast & Hygienic | Kitchen Essential",
     shortdesc:
@@ -1817,7 +1817,7 @@ const staticProducts = [
         name: "Electric Grape & Garlic Peeling Machine",
         label: "Buy 1 for Only 112.00 AED",
         discount: 0,
-        price: 112.00,
+        price: 99.00,
         originalPrice: 100,
         image: Product153,
       },
@@ -1827,7 +1827,7 @@ const staticProducts = [
         name: "Electric Grape & Garlic Peeling Machine",
         label: "Buy 2 & Get 10% Off",
         discount: 10,
-        price: 200.00, // 10% off on total 179.8
+        price: 179.00, // 10% off on total 179.8
         originalPrice: 200,
         note: "Perfect for you & a friend",
         mostPopular: true,
@@ -1839,7 +1839,7 @@ const staticProducts = [
         name: "Electric Grape & Garlic Peeling Machiney",
         label: "Buy 3 & Get 25% Off",
         discount: 25,
-        price: 252.00,
+        price: 219.00,
         originalPrice: 300,
         note: "Best Value",
         image: Product155,
@@ -1956,7 +1956,7 @@ const staticProducts = [
     id: 526257, //
     name: "Mini Portable Smart Projector",
     slug: "mini-portable-smart-projector",
-    price: 198.00,
+    price: 179.00,
     description:
       "Bring the Cinema Home — Anytime, Anywhere 🎥",
     shortdesc:
@@ -1979,12 +1979,12 @@ const staticProducts = [
     bundles: [
       {
         type: "Buy 1",
-        id: 526257,
+        id: 526258,
         name: "Mini Portable Smart Projector",
         label: "Buy 1 for Only 159 AED",
         discount: 0,
-        price: 198.00,
-        originalPrice: 349,
+        price: 179.00,
+        originalPrice: 329.00,
         image: Product177,
       },
       {
@@ -1993,8 +1993,8 @@ const staticProducts = [
         name: "Mini Portable Smart Projector",
         label: "Buy 2 & Get 15% Off",
         discount: 10,
-        price: 337.50, // 15% off on total 318
-        originalPrice: 699,
+        price: 329.00, // 15% off on total 318
+        originalPrice: 579,
         note: "Perfect for you & a friend",
         mostPopular: true,
         image: Product176,
@@ -2004,9 +2004,9 @@ const staticProducts = [
         id: 526260,
         name: "Mini Portable Smart Projector",
         label: "Buy 3 & Get 25% Off",
-        discount: 25,
-        price:446.00 ,
-        originalPrice: 1048,
+        discount: 0,
+        price:419.00 ,
+        originalPrice: 946,
         note: "Best Value",
         image: Product175,
       },
