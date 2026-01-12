@@ -1422,11 +1422,6 @@ const staticProducts = [
           others: false,
         },
         { feature: "17000 RPM Turbo Power", lumineux: true, others: false },
-        {
-          feature: "Dual Batteries + Fast Charger",
-          lumineux: true,
-          others: false,
-        },
         { feature: "Lightweight (1.5kg)", lumineux: true, others: false },
         {
           feature: "Multi-purpose Home & Car Use",
@@ -1461,11 +1456,7 @@ const staticProducts = [
         author: "Fatima A., Sharjah",
         stars: 5,
       },
-      {
-        text: "The dual batteries last long enough for my whole garden. Easy to use and super powerful.",
-        author: "Ali K., Abu Dhabi ",
-        stars: 5,
-      },
+     
     ],
 
     // section4Data: [
