@@ -97,7 +97,8 @@ const AppContent = () => {
 
 
   // Notification effect in AppContent
-  useEffect(() => {
+  // DISABLED: Promotional notifications
+  /* useEffect(() => {
     if (!("Notification" in window)) return; // Browser doesn't support notifications
 
     let promoInterval;
@@ -165,7 +166,7 @@ const AppContent = () => {
       clearInterval(promoInterval);
       window.removeEventListener("click", requestPermission);
     };
-  }, []);
+  }, []); */
 
 
   // Cart notification logic
