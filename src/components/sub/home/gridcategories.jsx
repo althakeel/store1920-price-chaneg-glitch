@@ -35,14 +35,14 @@ const initialProductPlaceholders = [
     id: 128574, 
     slug: "/gamebox-64-retro-console-20000-preloaded-games-4k-hdmi-wireless-controllers", 
     name: "GameBox 64 Retro Console – 20,000+ Preloaded Games with 4K HDMI & Wireless Controllers", 
-    price: "89.00",  
+    price: "79.90",  
     images: [{ src: Static1 }]  
   },
   { 
     id: 126009, 
     slug: "mini-portable-smart-projector", 
     name: "Mini Portable Smart Projector", 
-    price: "179.00", 
+    price: "149.90", 
     images: [{ src: Static2 }] 
   },
   { 
@@ -56,7 +56,7 @@ const initialProductPlaceholders = [
     id: 125925, 
     slug: "trimpro-21v-cordless-electric-pruning-shears", 
     name: "TrimPro™ 21V Cordless Electric Pruning Shears", 
-    price: "139.00", 
+    price: "119.90", 
     images: [{ src: Static4 }] 
   },
 ];
