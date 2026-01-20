@@ -14,6 +14,8 @@ import Product12 from '../assets/images/staticproducts/Boxing Machine/1.webp'
 import Product13 from '../assets/images/staticproducts/CCTV Camera/1.webp'
 import Product14 from '../assets/images/staticproducts/drill-machine/2.webp'
 import Product15 from '../assets/images/staticproducts/wrinkle-remover/10.webp'
+import Product16 from '../assets/images/staticproducts/massager/3.webp'
+
 
 const staticProducts = [
    
@@ -188,6 +190,18 @@ const staticProducts = [
     rating: 5,
     reviews: 199,
     sold: 305,
+  },
+   {
+    id: "11",
+    name: "Heated Shiatsu Massager ",
+    price: "139.00",
+    regular_price: "199.00",
+    sale_price: "139.00",
+    images: [{ src: Product16 }],
+    path: "/products/heated-shiatsu-massager-human-like-neck-back-relief-anywhere",
+    rating: 5,
+    reviews: 182,
+    sold: 85,
   },
 ];
 

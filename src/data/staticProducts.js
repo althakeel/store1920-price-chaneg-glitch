@@ -193,10 +193,12 @@ import Product216 from "../assets/images/staticproducts/wrinkle-remover/11.webp"
 import Product217 from "../assets/images/staticproducts/wrinkle-remover/12.webp";
 
 
-
-
-
-
+import Product220 from '../assets/images/staticproducts/massager/1.webp';
+import Product221 from '../assets/images/staticproducts/massager/2.webp';
+import Product222 from '../assets/images/staticproducts/massager/3.webp';
+import Product223 from '../assets/images/staticproducts/massager/4.webp';
+import Product224 from '../assets/images/staticproducts/massager/5.webp';
+import Product225 from '../assets/images/staticproducts/massager/6.webp';
 
 
 const staticProducts = [
@@ -2508,7 +2510,7 @@ const staticProducts = [
   {
   id: 526892, // listing ki id se sync
   name: "Drill Kit with 2 Battery – Ultimate Cordless Power Tool Set",
-  slug: "drill-kit-with-2-battery–ultimate-cordless-power-tool-set", // URL: /products/drill-machine
+  slug: "drill-kit-with-2-battery–ultimate-cordless-power-tool-set", 
 
   // ✅ Price according to content (AED 99.90)
   price: 109.90,
@@ -3165,7 +3167,200 @@ A: Yes — comes with USB charging cable.
 
 Price AED 79.99
 `,
-}
+},
+
+
+ {
+  id: 528578, // isko listing wali id se sync rakhna acha hai
+  name: "Heated Shiatsu Massager – Human-Like Neck & Back Relief Anywhere",
+  slug: "heated-shiatsu-massager-human-like-neck-back-relief-anywhere", // URL: /products/boxing-machine
+  price: 139.00,
+  salePrice: 139.00,
+  regularPrice: 199.0,
+
+  description:
+    "Deep Tissue, Cordless & Rechargeable – Feel Instant Relaxation in Minutes",
+  shortdesc:
+    "Deep Tissue, Cordless & Rechargeable – Feel Instant Relaxation in Minutes",
+
+  subdesc: "AED 139.00 (Limited-Time Offer)",
+  subdesc1: "🔋 2000mAh Battery ",
+  subdesc2: "♨️ Heat Therapy",
+  subdesc3: "🤲 Realistic Hand-Like Kneading",
+  subdesc4: "",
+  subdesc5: "",
+
+  // main images
+  image: Product220,
+  thumb1: Product221,
+  thumb2: Product222,
+  thumb3: Product223,
+  thumb4: Product224,
+  thumb5: Product225,
+  thumb6:Product220 ,
+
+
+
+  // 🔹 Bundle / pricing section (top right)
+  bundles: [
+    {
+      type: "Buy 1",
+      id: 528578,
+      name: "Heated Shiatsu Massager",
+      label: "Buy 1 for only 139.00 AED",
+      discount: 0,
+      slug: "heated-shiatsu-massager-human-like-neck-back-relief-anywhere",
+      price: 139.00,
+      originalPrice: 199,
+      image: Product220,
+    },
+    {
+      type: "Bundle of 2",
+      id: 528579,
+      name: "Heated Shiatsu Massager",
+      label: "Buy 2 & Get 15% Off",
+      discount: 15,
+      price: 225.00, // example: 89.9 * 2 * 0.85
+      originalPrice: 299,
+      note: "Deep Tissue, Cordless & Rechargeable",
+      mostPopular: true,
+      image: Product222,
+      slug: "heated-shiatsu-massager-human-like-neck-back-relief-anywhere",
+    },
+    {
+      type: "Bundle of 3",
+      id: 528580,
+      name: "Heated Shiatsu Massager",
+      label: "Buy 3 & Get 15% Off",
+      discount: 15,
+      price: 341.0, // example: 89.9 * 2 * 0.85
+      originalPrice: 399,
+      note: "Deep Tissue, Cordless & Rechargeable",
+      mostPopular: false,
+      image: Product225,
+      slug: "heated-shiatsu-massager-human-like-neck-back-relief-anywhere",
+    },
+  ],
+  BundleTitle: "BUNDLE AND SAVE MORE!",
+
+  // 🔹 Section 2 – Problem + Solution + Features
+  section2contentTitle: "Enjoy Real Human-Like Massage – Anytime, Anywhere",
+  section2contentDesc:
+    "This smart massager replicates deep-pressure hand kneading — soothing your body while you work, rest, or travel.",
+  section2list: [
+    " Deep Tissue Pressure",
+    " Heated Relief",
+    "Lightweight Cordless Design",
+    "USB Fast Charging (2000mAh)",
+
+  ],
+  section2contentPoints: [
+    "Cash on Delivery Available",
+    "Fast Delivery Across UAE",
+    "Gloves Included in the Box",
+    "Wall-Mounted, Space-Saving Design",
+  ],
+  section2image: Product225,
+
+  // 🔹 Section 3 – Use cases / lifestyle
+  section3title: "From Stress Relief to Full-Body Training – Fitness Just Became Fun",
+  section3image: Product223,
+  section3points: [
+    "Home Fitness Mode – burn calories & tone your body",
+    "Kids’ Energy Burner – safe, fun alternative to screen time",
+    "Office Stress Relief – 5-minute punch break to reset your mind",
+    "Pro Training – reaction time & speed improvement for boxers",
+  ],
+
+  // 🔹 Progress / stats bar
+  sectionProgressTitle: "Why UAE Customers Are Loving This:",
+  sectionProgressSubtitle: "",
+  sectionProgress: [
+    {
+      title: "6D Kneading Massage",
+      desc: "Reaches deep muscles, melts tension",
+      percent: 96,
+    },
+    {
+      title: "Soothing Heat Therapy",
+      desc: "Reduces inflammation, enhances circulation",
+      percent: 92,
+    },
+    {
+      title: " Cordless Portability",
+      desc: " Use in bed, office, car, or on vacation",
+      percent: 89,
+    },
+    {
+      title: " Fast USB Charging",
+      desc: "Parents use it as a fun exercise tool at home.",
+      percent: 94,
+    },
+  ],
+
+  // 🔹 Comparison table – smart boxing vs punching bag
+  comparisonData: {
+    title: "Fast Pain Relief Massager for Neck, Shoulder & Lower Back",
+    description:
+      "Relieves muscle pain fast. Loosens stiffness, reduces stress, and promotes better relaxation and sleep—perfect after gym or long work hours.",
+    headers: ["Feature", "This Massager", "Others "],
+    rows: [
+      { feature: "Human-Like Kneading Design", lumineux: true, others: false },
+      { feature: "Infrared Heat Therapy", lumineux: true, others: false },
+      { feature: "Rechargeable Battery (2000mAh)", lumineux: true, others: false },
+      { feature: "Lightweight & Cordless", lumineux: true, others: false },
+      { feature: "USB Fast Charging", lumineux: true, others: false },
+      { feature: "15-Day Return Policy", lumineux: true, others: false },
+    ],
+  },
+
+  section5image: Product221,
+
+  // 🔹 Guarantee
+  Guaranteetitle: "Try It Risk-Free for 30 Days",
+  Guranteedesc:
+    "We’re confident this smart trainer will completely upgrade your fitness routine. If you don’t love it, send it back — full refund, no questions asked.",
+
+  // 🔹 FAQs
+  Faq1Q: "How long does the battery last?",
+  fAQ1A:"Up to 12 days with 15-min daily use.",
+  Faq2Q: "Does it really feel like a human massage?",
+  fAQ2A:
+    "  Yes — simulates grip, rhythm & finger pressure.",
+  Faq3Q: "Is it safe to use daily?",
+  fAQ3A:
+    " Completely safe – designed for regular use at home or work.",
+  Faq4Q: "Can I carry it to work or travel?",
+  fAQ4A:
+    "Yes – it's cordless, under 1KG, and fits in your bag.",
+ 
+  // 🔹 Reviews
+  reviewsTitle: "See Why Users Love It",
+  reviewsRating: 4.9,
+  reviews: [
+  {
+    text: "Honestly surprised by how real the kneading feels. The heat plus pressure works perfectly for my neck after long office hours. Battery easily lasts several sessions.",
+    author: "Fatima S.",
+    stars: 5,
+  },
+  {
+    text: "I use this every night before bed and my sleep has improved a lot. The heat is soothing and it really loosens tight shoulder muscles.",
+    author: "Omar K.",
+    stars: 5,
+  },
+  {
+    text: "Bought one for myself and ended up ordering another for my parents. Very comfortable, easy to charge, and great relief for back pain.",
+    author: "Ayesha M.",
+    stars: 5,
+  },
+  {
+    text: "Perfect after gym sessions. Deep pressure feels strong but relaxing, and being cordless makes it super convenient to use anywhere.",
+    author: "Daniel R.",
+    stars: 5,
+  },
+]
+
+},
 
 
 

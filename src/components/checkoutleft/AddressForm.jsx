@@ -268,9 +268,19 @@ const AddressForm = ({ formData, onChange, onSubmit, onClose, saving, error, car
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
+        let errorData;
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          errorData = await response.json();
+        } else {
+          errorData = await response.text();
+        }
         console.error('❌ Backend error:', errorData);
-        throw new Error(errorData?.message || 'Failed to save address on backend');
+        throw new Error(
+          typeof errorData === 'object' && errorData?.message
+            ? errorData.message
+            : 'Failed to save address on backend: ' + errorData
+        );
       }
 
       const result = await response.json();
