@@ -30,12 +30,13 @@ import Product16 from '../../../assets/images/staticproducts/wrinkle-remover/1.w
 
 
 const PAGE_SIZE = 10;
-const INITIAL_VISIBLE = 24;
+const INITIAL_VISIBLE = 84;
 const QUICK_LOAD_COUNT = 10; // Load 10 products quickly first
 const PRODUCT_FETCH_LIMIT = 24;
 const RECOMMENDED_CATEGORY_LIMIT = 8;
 const CATEGORY_PAGE_LIMIT = 4;
 const MAX_PRODUCTS = 580;
+const ITEMS_PER_ROW = 4;
 
 
 // Utility to decode HTML entities
@@ -675,7 +676,8 @@ const handleMouseLeave = (id) => {
 
 const renderProducts = (productsToShowParam) => {
   let productsToShow = productsToShowParam;
-  const count = Math.min(visibleCount, productsToShow.length);
+  const countRaw = Math.min(visibleCount, productsToShow.length);
+  const count = Math.min(productsToShow.length, Math.ceil(countRaw / ITEMS_PER_ROW) * ITEMS_PER_ROW);
   return productsToShow.slice(0, count).map((p, index) => {
     const hasSale = p.sale_price && p.sale_price !== p.regular_price;
     const hasSecondImage = p.images && p.images.length > 1 && typeof p.images[1]?.src === 'string' && p.images[1]?.src.trim() !== '';
