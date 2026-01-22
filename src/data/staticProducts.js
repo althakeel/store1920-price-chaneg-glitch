@@ -3400,7 +3400,7 @@ Price AED 79.99
       label: "Buy 1 for only 149.00 AED",
       discount: 0,
       slug: "green-lion-power-trio-3-in-1-magnetic-wireless-charger",
-      price: 139.00,
+      price: 149.00,
       originalPrice: 199,
       image: Product229,
     },
