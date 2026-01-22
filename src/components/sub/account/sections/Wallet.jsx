@@ -111,11 +111,20 @@ const Wallet = () => {
         });
       }
     } catch (err) {
-      setMessageType("error");
-      setMessage(
-        err.response?.data?.message || "Withdrawal request failed"
-      );
-    } finally {
+        const backendMessage =
+          err.response?.data?.message || "Withdrawal request failed";
+
+        setMessageType("error");
+        setMessage(backendMessage);
+
+        // ✅ If withdrawal already exists, close modal
+        if (
+          backendMessage.toLowerCase().includes("already") ||
+          backendMessage.toLowerCase().includes("pending")
+        ) {
+          setShowWithdraw(false);
+        }
+      }finally {
       setSubmitting(false);
     }
   };

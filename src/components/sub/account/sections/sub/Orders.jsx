@@ -234,11 +234,63 @@ const AllOrders = ({
     }
   };
 
-  const handleReturnProduct = async () => {
+//   const handleReturnProduct = async () => {
+//   if (!returningOrder) return;
+
+//   const reason = selectedReason === 'Other' ? otherReason : selectedReason;
+//   if (!reason) return toast.error('Please select or enter a reason');
+
+//   const formData = new FormData();
+//   formData.append('order_id', returningOrder.id);
+//   formData.append('reason', reason);
+//   formData.append('email', returningOrder.billing.email);
+
+//   returnImages.forEach((file) => {
+//     formData.append('images[]', file);
+//   });
+
+//   try {
+//     const res = await axios.post(
+//       'https://db.store1920.com/wp-json/custom/v1/return-order',
+//       formData,
+//       {
+//         headers: { 'Content-Type': 'multipart/form-data' },
+//       }
+//     );
+
+//     if (res.data.success) {
+//       toast.success('Return request submitted!');
+//       setReturningOrder(null);
+//       setSelectedReason('');
+//       setOtherReason('');
+//       setReturnImages([]);
+//     } else {
+//       toast.error(res.data.message || 'Failed to submit return request');
+//     }
+//   } catch (err) {
+//     console.error(err);
+//     toast.error('Error submitting return request');
+//   }
+// };
+
+const handleReturnProduct = async () => {
   if (!returningOrder) return;
 
+  if (returnImages.length === 0) {
+    toast.error('Please upload at least one image');
+    return;
+  }
+
+  if (returnImages.length > 5) {
+    toast.error('You can upload up to 5 images only');
+    return;
+  }
+
   const reason = selectedReason === 'Other' ? otherReason : selectedReason;
-  if (!reason) return toast.error('Please select or enter a reason');
+  if (!reason) {
+    toast.error('Please select or enter a reason');
+    return;
+  }
 
   const formData = new FormData();
   formData.append('order_id', returningOrder.id);
@@ -252,10 +304,7 @@ const AllOrders = ({
   try {
     const res = await axios.post(
       'https://db.store1920.com/wp-json/custom/v1/return-order',
-      formData,
-      {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      }
+      formData
     );
 
     if (res.data.success) {
@@ -273,7 +322,6 @@ const AllOrders = ({
   }
 };
 
-
 const canReturn = (order) => {
   const deliveredDate = new Date(order.date_created);
   const returnDeadline = new Date(deliveredDate);
@@ -284,7 +332,12 @@ const canReturn = (order) => {
 
   return (
     <div className="order-list">
-      <ToastContainer position="bottom-center" autoClose={2000} hideProgressBar />
+      <ToastContainer
+      position="top-center"
+      autoClose={2500}
+      hideProgressBar
+      newestOnTop
+    />
 
       {editingOrder && (
         <AddressForm
@@ -310,6 +363,7 @@ const canReturn = (order) => {
 
       {returningOrder && (
         <div className="return-modal-overlay">
+          {/* <ToastContainer position="bottom-center" autoClose={2000} hideProgressBar /> */}
           <div className="return-modal">
             <h2>Return Product - PO-{returningOrder.id}</h2>
             <p>Please select a reason for returning this product:</p>
@@ -469,7 +523,7 @@ const canReturn = (order) => {
           </div>
 
           <div className="order-actions-simple">
-            <button className="btn-outline" onClick={() => openEditAddress(order)}>Change address</button>
+            {/* <button className="btn-outline" onClick={() => openEditAddress(order)}>Change address</button> */}
             <button className="btn-secondary" onClick={() => handleBuyAgain(order.line_items, order.id)} disabled={buyingAgainOrderId === order.id}>
               {buyingAgainOrderId === order.id ? 'Adding...' : 'Buy this again'}
             </button>
