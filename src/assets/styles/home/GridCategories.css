@@ -1,3 +1,18 @@
+@media (max-width: 768px) {
+  .gcx-banner {
+    min-height: 120px;
+    height: 32vw;
+    max-height: 220px;
+  }
+  .gcx-banner img {
+    height: 32vw;
+    min-height: 120px;
+    max-height: 220px;
+    object-fit: cover;
+    width: 100%;
+    border-radius: 12px;
+  }
+}
 /* --- Layout reset for precise sizing --- */
 *, *::before, *::after { box-sizing: border-box; }
 
@@ -54,6 +69,16 @@
   border-radius: 12px;
   padding: 15px 10px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  animation: bgColorChangeLeft 120s ease-in-out infinite;
+}
+
+@keyframes bgColorChangeLeft {
+  0% { background: #222222; }
+  20% { background: #1a1a2e; }
+  40% { background: #16213e; }
+  60% { background: #0f3460; }
+  80% { background: #1a1a2e; }
+  100% { background: #222222; }
 }
 
 .gcx-left-grid {
@@ -72,14 +97,14 @@
   cursor: pointer;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
   transition: transform 0.2s, box-shadow 0.2s;
-  height: 100%;     
+  height: 100%;
+  position: relative;
 }
 
 .gcx-category-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
 }
 
 
@@ -87,27 +112,27 @@
   width: 100%;
   height: 100%;           
   object-fit: cover;      
-  border-radius: 12px 12px 0 0;
-  background-color: #f5f5f5;
+  display: block;
   min-height: 0;
 }
 
 
 .gcx-cat-info {
-  padding: 8px 10px;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.6) 70%, transparent 100%);
+  padding: 30px 10px 12px;
   text-align: center;
 }
 
 .gcx-cat-info h4 {
   font-size: 14px;
   font-weight: 700;
-  margin: 4px 0;
-}
-
-.gcx-cat-info p {
-  font-size: 12px;
-  color: #666;
   margin: 0;
+  color: #ffffff;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.3);
 }
 
 /* ==============================
@@ -117,6 +142,16 @@
   background: #FF4D4D;
   border-radius: 12px;
   padding: 15px 10px;
+  animation: bgColorChangeMiddle 120s ease-in-out infinite;
+}
+
+@keyframes bgColorChangeMiddle {
+  0% { background: #FF4D4D; }
+  20% { background: #FF6B35; }
+  40% { background: #F7B731; }
+  60% { background: #5F27CD; }
+  80% { background: #00D2FF; }
+  100% { background: #FF4D4D; }
 }
 
 .gcx-featured-header {

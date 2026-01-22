@@ -68,13 +68,13 @@ import MobileNavbar from './components/Mobile/MobileNavbar';
 import ChatBot from './components/sub/Chatbot';
 import CookiePopup from './components/common/CookiePopup';
 import PurchasePopup from './components/common/PurchasePopup';
-import SoundAlert from './assets/sound/alertsound.mp3';
 import LogoIcon from './assets/images/logo.webp';
 import AdsImage from './assets/images/ads/ads.webp'
 import NewUserBonusPopup from './components/common/newpopup';
 import TamaraSuccess from './pages/tamara-success';
 import TamaraFailure from './pages/tamara-failure';
 import TamaraCancel from './pages/tamara-cancel';
+import PaymentCallback from './pages/PaymentCallback';
 
 
 const AppContent = () => {
@@ -96,7 +96,8 @@ const AppContent = () => {
 
 
   // Notification effect in AppContent
-  useEffect(() => {
+  // DISABLED: Promotional notifications
+  /* useEffect(() => {
     if (!("Notification" in window)) return; // Browser doesn't support notifications
 
     let promoInterval;
@@ -164,12 +165,11 @@ const AppContent = () => {
       clearInterval(promoInterval);
       window.removeEventListener("click", requestPermission);
     };
-  }, []);
+  }, []); */
 
 
-  // Cart notification logic
-  // Cart notification logic
-  useEffect(() => {
+  // Cart notification logic (disabled)
+  /* useEffect(() => {
     if (!("Notification" in window)) return; // Browser doesn't support notifications
 
     let notificationTimeout;
@@ -182,8 +182,6 @@ const AppContent = () => {
           icon: `${window.location.origin}/logo.webp`,
           image: cartItems[0]?.image,
         });
-        const audio = new Audio(SoundAlert);
-        audio.play().catch(() => console.log('Audio blocked until user interacts'));
 
         notification.onclick = () => {
           window.focus();
@@ -223,7 +221,7 @@ const AppContent = () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('click', requestPermission);
     };
-  }, [cartItems]);
+  }, [cartItems]); */
 
 
   const excludeMiniCartPaths = ['/cart', '/checkout', '/lost-password', '/order-success', '/order-cancel'];
@@ -371,6 +369,7 @@ const AppContent = () => {
                     <Route path="/tamara-success" element={<TamaraSuccess />} />
                     <Route path="/tamara-failure" element={<TamaraFailure />} />
                     <Route path="/tamara-cancel" element={<TamaraCancel />} />
+                    <Route path="/payment-callback" element={<PaymentCallback />} />
 
                   </Routes>
                 </main>

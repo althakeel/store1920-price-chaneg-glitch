@@ -1,0 +1,334 @@
+/* Order Confirmed Popup Styles */
+
+.order-confirmed-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeInOverlay 0.3s ease-in-out;
+}
+
+@keyframes fadeInOverlay {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUpModal {
+  from {
+    transform: translateY(40px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes popCheckmark {
+  0% {
+    transform: scale(0) rotate(-45deg);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2) rotate(10deg);
+  }
+  100% {
+    transform: scale(1) rotate(0);
+    opacity: 1;
+  }
+}
+
+.order-confirmed-modal {
+  background: white;
+  border-radius: 24px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  width: 90%;
+  max-width: 480px;
+  padding: 40px 32px;
+  position: relative;
+  animation: slideUpModal 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  text-align: center;
+}
+
+.order-confirmed-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: transparent;
+  border: none;
+  font-size: 28px;
+  cursor: pointer;
+  color: #bbb;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.order-confirmed-close:hover {
+  background-color: #f0f0f0;
+  color: #666;
+}
+
+/* Icon Section */
+.order-confirmed-icon-wrapper {
+  margin-bottom: 24px;
+  perspective: 1000px;
+}
+
+.order-confirmed-checkmark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 90px;
+  height: 90px;
+  background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
+  border-radius: 50%;
+  margin: 0 auto;
+  font-size: 50px;
+  color: white;
+  font-weight: bold;
+  box-shadow: 0 10px 30px rgba(76, 175, 80, 0.3);
+  animation: popCheckmark 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+  position: relative;
+}
+
+.order-confirmed-checkmark::before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: rgba(76, 175, 80, 0.2);
+  animation: pulse 1.5s ease-out;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+/* Title Section */
+.order-confirmed-title {
+  margin: 24px 0 20px 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: #1a1a1a;
+  line-height: 1.3;
+}
+
+/* Offer Section */
+.order-confirmed-offer {
+  background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  border-left: 4px solid #FFC107;
+}
+
+.offer-text {
+  margin: 0;
+  font-size: 14px;
+  color: #4a4a4a;
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+.offer-highlight {
+  color: #27ae60;
+  font-weight: 700;
+  font-size: 15px;
+}
+
+/* Payment Methods Section */
+.order-confirmed-payment-methods {
+  margin-bottom: 28px;
+}
+
+.payment-methods-icons {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.method-icon {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+  padding: 8px;
+  background: #f9fafb;
+  border: 2px solid #e5e5e5;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+}
+
+.method-icon:hover {
+  border-color: #FFC107;
+  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.2);
+  transform: translateY(-2px);
+}
+
+/* Action Buttons */
+.order-confirmed-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.order-confirmed-pay-now,
+.order-confirmed-no-thanks {
+  padding: 14px 24px;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.order-confirmed-pay-now {
+  background: linear-gradient(135deg, #FFC107 0%, #FFB300 100%);
+  color: #000;
+  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+}
+
+.order-confirmed-pay-now:hover:not(:disabled) {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(255, 193, 7, 0.4);
+}
+
+.order-confirmed-pay-now:active:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.lightning-icon {
+  font-size: 18px;
+  animation: lightning-flash 1s ease-in-out infinite;
+}
+
+@keyframes lightning-flash {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.order-confirmed-no-thanks {
+  background: #f5f5f5;
+  color: #333;
+  border: 1.5px solid #e0e0e0;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+.order-confirmed-no-thanks:hover:not(:disabled) {
+  background: #eeeeee;
+  border-color: #bdbdbd;
+}
+
+.order-confirmed-pay-now:disabled,
+.order-confirmed-no-thanks:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Loading Spinner */
+.loading-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(0, 0, 0, 0.2);
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Order ID Info */
+.order-confirmed-info {
+  padding-top: 16px;
+  border-top: 1px solid #f0f0f0;
+  font-size: 12px;
+  color: #999;
+}
+
+.order-confirmed-info p {
+  margin: 0;
+  font-weight: 500;
+}
+
+.order-confirmed-info strong {
+  color: #27ae60;
+  font-weight: 700;
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+  .order-confirmed-modal {
+    width: 95%;
+    padding: 32px 20px;
+  }
+
+  .order-confirmed-checkmark {
+    width: 80px;
+    height: 80px;
+    font-size: 45px;
+  }
+
+  .order-confirmed-title {
+    font-size: 20px;
+    margin: 16px 0 16px 0;
+  }
+
+  .offer-text {
+    font-size: 13px;
+  }
+
+  .method-icon {
+    width: 45px;
+    height: 45px;
+  }
+
+  .payment-methods-icons {
+    gap: 10px;
+  }
+
+  .order-confirmed-pay-now,
+  .order-confirmed-no-thanks {
+    font-size: 14px;
+    padding: 12px 20px;
+  }
+}

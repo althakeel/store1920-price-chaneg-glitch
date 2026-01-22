@@ -1,3 +1,36 @@
+.desktop-only {
+  display: block;
+}
+@media (max-width: 768px) {
+  .desktop-only {
+    display: none !important;
+  }
+}
+.summaryRowCR {
+  display: flex;
+}
+@media (max-width: 768px) {
+  .summaryRowCR {
+    display: none;
+  }
+}
+/* Mobile/desktop order summary visibility */
+/* Responsive Order Summary: normal on desktop, sticky on top for mobile */
+.orderSummaryResponsive {
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .orderSummaryResponsive {
+    position: static;
+    z-index: auto;
+    background: none;
+    padding: 0;
+    margin-bottom: 8px;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
 /* CheckoutRight.module.css or unique-prefixed CSS */
 
 .checkoutRightContainer {

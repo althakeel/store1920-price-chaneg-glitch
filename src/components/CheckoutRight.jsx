@@ -4,6 +4,8 @@ import '../assets/styles/checkout/CheckoutRight.css';
 import TrustSection from './checkout/TrustSection';
 import CouponDiscount from './sub/account/CouponDiscount';
 import CoinBalance from './sub/account/CoinBalace';
+import OrderConfirmedPopup from './checkout/OrderConfirmedPopup';
+import PaymentMethodSelector from './checkout/PaymentMethodSelector';
 import Tabby from '../assets/images/Footer icons/3.webp'
 import Tamara from '../assets/images/Footer icons/6.webp'
 
@@ -68,12 +70,17 @@ const parsePrice = (raw) => {
 // -----------------------------
 // CheckoutRight Component
 // -----------------------------
-export default function CheckoutRight({ cartItems, formData, createOrder, clearCart, orderId }) {
+export default function CheckoutRight({ cartItems, formData, createOrder, clearCart, orderId, showForm = false }) {
   const [alert, setAlert] = useState({ message: '', type: 'info' });
   const [hoverMessage, setHoverMessage] = useState('');
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   const [discount, setDiscount] = useState(0);
   const [coinDiscount, setCoinDiscount] = useState(0);
+  const [showOrderConfirmed, setShowOrderConfirmed] = useState(false);
+  const [editingAddress, setEditingAddress] = useState(false);
+  const [confirmedOrderId, setConfirmedOrderId] = useState(null);
+  const [confirmedOrderTotal, setConfirmedOrderTotal] = useState(0);
+  const [showPaymentSelector, setShowPaymentSelector] = useState(false);
 
   const showAlert = (message, type = 'info') => setAlert({ message, type });
 
@@ -87,6 +94,7 @@ export default function CheckoutRight({ cartItems, formData, createOrder, clearC
   const totalWithDelivery = subtotal;
   const amountToSend = Math.max(totalWithDelivery, 0.01);
   const hasCartItems = cartItems.some((item) => (parseInt(item.quantity, 10) || 0) > 0);
+  const isAddressFormOpen = !!(showForm || formData?.addressModalOpen);
 
   const requiredFields = [
     'first_name',
@@ -137,10 +145,13 @@ export default function CheckoutRight({ cartItems, formData, createOrder, clearC
       const id = orderId || (await createOrder());
       await captureOrderItems(id, cartItems, shippingOrBilling);
 
-      // COD
+      // COD - Show order confirmed popup instead of redirecting
       if (formData.paymentMethod === 'cod') {
         clearCart();
-        window.location.href = `/order-success?order_id=${id.id || id}`;
+        setConfirmedOrderId(id.id || id);
+        setConfirmedOrderTotal(amountToSend); // Store the order total
+        setShowOrderConfirmed(true);
+        setIsPlacingOrder(false);
         return;
       }
 
@@ -347,6 +358,115 @@ export default function CheckoutRight({ cartItems, formData, createOrder, clearC
     return base;
   };
 
+  // Handle "Pay Now" from order confirmed popup
+  const handlePayNowFromConfirmation = () => {
+    // Show payment method selector
+    setShowOrderConfirmed(false);
+    setShowPaymentSelector(true);
+  };
+
+  // Handle close order confirmed popup
+  const handleCloseOrderConfirmed = () => {
+    setShowOrderConfirmed(false);
+    console.log('✅ COD Order Confirmed - Redirecting to success page');
+    // For COD orders, redirect to payment callback which shows success
+    // This ensures proper status checking
+    window.location.href = `/payment-callback?order_id=${confirmedOrderId}`;
+  };
+
+  // Handle payment method selection from selector
+  const handleSelectPaymentMethod = async (method, amount, orderId) => {
+    setShowPaymentSelector(false);
+    
+    // The amount passed already includes the 5% discount from the selector
+    // No need to apply discount again - use it as is
+    const finalAmount = amount;
+    
+    // Format data for payment processing
+    const shippingOrBilling = formData.shipping || formData.billing || {};
+    const normalized = {
+      first_name: shippingOrBilling.first_name?.trim() || 'First',
+      email: shippingOrBilling.email?.trim() || 'customer@example.com',
+      phone_number: shippingOrBilling.phone_number?.startsWith('+')
+        ? shippingOrBilling.phone_number
+        : `+${shippingOrBilling.phone_number || '971501234567'}`,
+    };
+
+    try {
+      // CARD PAYMENT
+      if (method === 'card') {
+        const payload = {
+          amount: finalAmount,
+          order_id: orderId,
+          billing: normalized,
+          frontend_success: window.location.origin + '/order-success',
+        };
+
+        const res = await fetch('https://db.store1920.com/wp-json/custom/v3/stripe-direct', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+        if (!res.ok || !data.checkout_url) {
+          throw new Error(data.error || 'Failed to start payment.');
+        }
+        window.location.href = data.checkout_url;
+        return;
+      }
+
+      // TABBY PAYMENT
+      if (method === 'tabby') {
+        const phone = shippingOrBilling.phone_number || "";
+        const fullPhone = `+971${phone}`;
+
+        const payload = {
+          amount: finalAmount,
+          order_id: orderId,
+          billing: { ...normalized, phone_number: fullPhone }
+        };
+
+        const res = await fetch('https://db.store1920.com/wp-json/custom/v1/tabby-intent', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+        const data = await res.json();
+        if (!res.ok || !data.checkout_url) {
+          throw new Error(data.error || 'Failed to start Tabby payment.');
+        }
+        window.location.href = data.checkout_url;
+        return;
+      }
+
+      // TAMARA PAYMENT
+      if (method === 'tamara') {
+        const payload = {
+          amount: finalAmount,
+          order_id: orderId,
+          billing: normalized,
+        };
+        const res = await fetch('https://db.store1920.com/wp-json/custom/v1/tamara-intent', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+        if (data.checkout_url) {
+          window.location.href = data.checkout_url;
+        } else {
+          throw new Error('Failed to start Tamara payment.');
+        }
+      }
+    } catch (err) {
+      console.error('Payment error:', err);
+      showAlert(err.message || 'Failed to process payment.', 'error');
+      // Show selector again on error
+      setShowPaymentSelector(true);
+    }
+  };
+
   const getButtonLabel = () => {
     const labels = {
       cod: 'Cash on Delivery',
@@ -428,28 +548,86 @@ export default function CheckoutRight({ cartItems, formData, createOrder, clearC
 
   return (
     <aside className="checkoutRightContainer">
+      {/* Order Confirmed Popup */}
+      <OrderConfirmedPopup
+        isOpen={showOrderConfirmed}
+        onClose={handleCloseOrderConfirmed}
+        onPayNow={handlePayNowFromConfirmation}
+        orderId={confirmedOrderId}
+        isLoading={false}
+        paymentMethod={formData.paymentMethod}
+      />
+
+      {/* Payment Method Selector */}
+      <PaymentMethodSelector
+        isOpen={showPaymentSelector}
+        onClose={() => {
+          // When closing payment selector, confirm order as COD
+          setShowPaymentSelector(false);
+          window.location.href = `/order-success?order_id=${confirmedOrderId}`;
+        }}
+        onSelectMethod={handleSelectPaymentMethod}
+        subtotal={confirmedOrderTotal}
+        orderId={confirmedOrderId}
+        isLoading={false}
+      />
+
       <Alert
         message={alert.message}
         type={alert.type}
         onClose={() => setAlert({ message: '', type: 'info' })}
       />
-      <h2>Order Summary</h2>
+      {/* Order Summary: only show when order confirmed popup is NOT open (desktop and mobile) */}
+      {!showOrderConfirmed && (
+        <>
+          <div className="orderSummaryResponsive desktop-only">
+            <h2
+              style={{
+                marginBottom: '12px',
+                fontSize: '18px',
+                fontWeight: 700,
+                color: '#222'
+              }}
+            >
+              Order Summary
+            </h2>
+            <CouponDiscount onApplyCoupon={() => {}} />
+            <div className="summaryRowCR" style={{ marginTop: '1rem' }}>
+              <span>Total:</span>
+              <strong>{`AED ${totalWithDelivery.toFixed(2)}`}</strong>
+            </div>
+          </div>
+          {/* Mobile order summary (if you have a mobile-only version, add the same !showOrderConfirmed check there) */}
+        </>
+      )}
 
-      <CouponDiscount onApplyCoupon={() => {}} />
-
-      <div className="summaryRowCR">
-        <span>Total:</span>
-        <span>AED {totalWithDelivery.toFixed(2)}</span>
-      </div>
-
+      {/* Desktop: normal button */}
       <button
-        className="placeOrderBtnCR"
+        className="placeOrderBtnCR desktopStickyButton"
         onClick={handlePlaceOrder}
         disabled={isPlacingOrder || !canPlaceOrder}
         style={getButtonStyle()}
       >
         {getButtonLabel()}
       </button>
+
+      {/* Mobile: sticky button with total, only after address is complete and not editing address/form or order popup */}
+      {isAddressComplete && !editingAddress && !isAddressFormOpen && !showOrderConfirmed && (
+        <div className="mobileStickyButton">
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', marginRight: '12px' }}>
+            <span style={{ fontSize: '12px', color: '#666', fontWeight: 500, marginBottom: '2px', marginLeft: '2px' }}>Total:</span>
+            <span className="mobileSubtotal" style={{ fontSize: '18px', fontWeight: 700, color: '#111' }}> AED {totalWithDelivery.toFixed(2)}</span>
+          </div>
+          <button
+            className="placeOrderBtnCR"
+            onClick={handlePlaceOrder}
+            disabled={isPlacingOrder || !canPlaceOrder}
+            style={getButtonStyle()}
+          >
+            {getButtonLabel()}
+          </button>
+        </div>
+      )}
 
       <TrustSection />
     </aside>

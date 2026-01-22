@@ -30,12 +30,13 @@ import Product16 from '../../../assets/images/staticproducts/wrinkle-remover/1.w
 
 
 const PAGE_SIZE = 10;
-const INITIAL_VISIBLE = 24;
+const INITIAL_VISIBLE = 84;
 const QUICK_LOAD_COUNT = 10; // Load 10 products quickly first
 const PRODUCT_FETCH_LIMIT = 24;
 const RECOMMENDED_CATEGORY_LIMIT = 8;
 const CATEGORY_PAGE_LIMIT = 4;
 const MAX_PRODUCTS = 580;
+const ITEMS_PER_ROW = 4;
 
 
 // Utility to decode HTML entities
@@ -146,9 +147,9 @@ const staticProducts = [
   {
     id: "68V Cordless Portable Car Wash Pressure Washer Gun with Dual",
     name: "68V Cordless Portable Car Wash Pressure Washer Gun with Dual",
-    price: "89.90",
+    price: "69.90",
     regular_price: "149.90",
-    sale_price: "89.90",
+    sale_price: "69.90",
     images: [{ src: Product1 }],
     slug: "68v-cordless-portable-car-wash-pressure-washer-gun-with-dual",
     path: "/products/68v-cordless-portable-car-wash-pressure-washer-gun-with-dual",
@@ -160,7 +161,7 @@ const staticProducts = [
   {
     id: "twin-size-air-mattress-with-built-in-rechargeable-pump-16-self-inflating-blow-up-bed-for-home-camping-guests",
     name: "Twin Size Air Mattress with Built-in Rechargeable Pump – 16 Self-Inflating Blow Up Bed for Home, Camping & Guests",
-    price: "174.00",
+    price: "159.90.00",
     regular_price: "189.0",
     sale_price: "174.00",
     images: [{ src: Product2 }],
@@ -174,9 +175,9 @@ const staticProducts = [
   {
     id: "850w-electric-paint-sprayer-uae",
     name: "Electric Paint Sprayer",
-    price: "113.00",
+    price: "99.90",
     regular_price: "250.0",
-    sale_price: "113.00",
+    sale_price: "99.90",
     images: [{ src: Product3 }],
     slug: "850w-electric-paint-sprayer-uae",
     path: "/products/850w-electric-paint-sprayer-uae",
@@ -188,9 +189,9 @@ const staticProducts = [
   {
     id: "5",
     name: "TrimPro™ 21V Cordless Electric Pruning Shears",
-    price: "138.00",
+    price: "119.90",
     regular_price: "250.0",
-    sale_price: "138.00",
+    sale_price: "119.90",
     images: [{ src: Product4 }],
     slug: "trimpro-21v-cordless-electric-pruning-shears",
     path: "/products/trimpro-21v-cordless-electric-pruning-shears",
@@ -202,9 +203,9 @@ const staticProducts = [
   {
     id: "6",
     name: "GameBox 64 Retro Console – 20,000+ Preloaded Games with 4K HDMI & Wireless Controllers",
-    price: "89.00",
+    price: "79.90",
     regular_price: "96.0",
-    sale_price: "89.00",
+    sale_price: "79.90",
     images: [{ src: Product5 }],
     slug: "gamebox-64-retro-console-20000-preloaded-games-4k-hdmi-wireless-controllerse",
     path: "/products/gamebox-64-retro-console-20000-preloaded-games-4k-hdmi-wireless-controllers",
@@ -215,10 +216,10 @@ const staticProducts = [
   },
   {
     id: "7",
-    name: "Cordless 2-in-1 Leaf Blower",
-    price: "69.90",
+    name: "Cordless Leaf Blower",
+    price: "59.90",
     regular_price: "189.00",
-    sale_price: "69.90",
+    sale_price: "59.90",
     images: [{ src: Product7 }],
     slug: "cordless-2-in-1-leaf-blower-vacuum",
     path: "/products/cordless-2-in-1-leaf-blower-vacuum",
@@ -230,9 +231,9 @@ const staticProducts = [
   {
     id: "8",
     name: "Turbo Cordless Leaf Blower – 21V Power for Every Task",
-    price: "64.90",
+    price: "49.90",
     regular_price: "99.98",
-    sale_price: "64.90",
+    sale_price: "49.90",
     images: [{ src: Product8 }],
     slug: "turbo-cordless-leaf-blower-21v-power-for-every-task",
     path: "/products/turbo-cordless-leaf-blower-21v-power-for-every-task",
@@ -244,9 +245,9 @@ const staticProducts = [
   {
     id: "9",
     name: "Steam Cleaner DF-A001 – Japan Technology",
-    price: "112.50",
+    price: "89.90",
     regular_price: "129.98",
-    sale_price: "112.50",
+    sale_price: "89.90",
     images: [{ src: Product9 }],
     slug: "steam-cleaner-df-a001-japan-technology",
     path: "/products/steam-cleaner-df-a001-japan-technology",
@@ -258,9 +259,9 @@ const staticProducts = [
   {
     id: "10",
     name: "Electric Grape & Garlic Peeling Machine",
-    price: "112.00",
+    price: "89.90",
     regular_price: "100.00",
-    sale_price: "112.00",
+    sale_price: "89.90",
     images: [{ src: Product6 }],
     slug: "electric-grape-garlic-peeling-machine",
     path: "/products/electric-grape-garlic-peeling-machine",
@@ -272,7 +273,7 @@ const staticProducts = [
   {
     id: 526258,
     name: "Mini Portable Smart Projector",
-    price: 179.0,
+    price: 149.90,
     regular_price: 349.0,
     sale_price: 179.0,
     images: [{ src: Product12 }],
@@ -675,7 +676,8 @@ const handleMouseLeave = (id) => {
 
 const renderProducts = (productsToShowParam) => {
   let productsToShow = productsToShowParam;
-  const count = Math.min(visibleCount, productsToShow.length);
+  const countRaw = Math.min(visibleCount, productsToShow.length);
+  const count = Math.min(productsToShow.length, Math.ceil(countRaw / ITEMS_PER_ROW) * ITEMS_PER_ROW);
   return productsToShow.slice(0, count).map((p, index) => {
     const hasSale = p.sale_price && p.sale_price !== p.regular_price;
     const hasSecondImage = p.images && p.images.length > 1 && typeof p.images[1]?.src === 'string' && p.images[1]?.src.trim() !== '';

@@ -64,6 +64,15 @@ const AddressForm = ({ formData, onChange, onSubmit, onClose, saving, error, car
   const [markerPosition, setMarkerPosition] = useState(null);
   const [mapSelected, setMapSelected] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [viewportWidth, setViewportWidth] = useState(() => (typeof window !== 'undefined' ? window.innerWidth : 1024));
+
+  useEffect(() => {
+    const handleResize = () => setViewportWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const isDesktop = viewportWidth >= 1000;
 
 
   // --- City/Area Google Places Autocomplete ---
@@ -147,15 +156,7 @@ const AddressForm = ({ formData, onChange, onSubmit, onClose, saving, error, car
         if (!value || value.trim() === '') return 'This field is required';
         break;
      
-      case 'phone_number':
-        if (!value || value.trim() === '') return 'Phone number is required';
-        // Accept exactly 7 digits for the phone number field
-        if (!/^[0-9]{9}$/.test(value)) return 'Mobile No must start with 5 (example: 501234567)';
-        break;
-      case 'email':
-        if (!value || !/\S+@\S+\.\S+/.test(value)) return 'Invalid email';
-        break;
-        case 'phone_number': {
+      case 'phone_number': {
         const digits = (value || "").toString().replace(/\D/g, "");
 
         if (!digits) return 'Phone number is required';
@@ -169,6 +170,10 @@ const AddressForm = ({ formData, onChange, onSubmit, onClose, saving, error, car
 
         break;
       }
+      
+      case 'email':
+        if (!value || !/\S+@\S+\.\S+/.test(value)) return 'Invalid email';
+        break;
 
       default:
         return '';
@@ -215,39 +220,29 @@ const AddressForm = ({ formData, onChange, onSubmit, onClose, saving, error, car
     if (isSubmitting) return; // Prevent double clicks
     setIsSubmitting(true);
 
-    // Validate phone: must be 7 digits (the last part)
-    // const phone = (formData.shipping.phone_number || '').toString().trim();
-  
+    const raw = formData.shipping.phone_number || "";
+    const phone = normalizePhoneForSave(raw);
 
-            const raw = formData.shipping.phone_number || "";
-            const phone = normalizePhoneForSave(raw);
+    console.log('🔍 Address Save - Phone Validation:', { raw, phone, length: phone.length });
 
-            if (!/^[5][0-9]{8}$/.test(phone)) {
-              alert("Please enter a valid UAE mobile number starting with 5 (e.g., 501234567).");
-              setFormErrors((prev) => ({ ...prev, phone_number: "Number must start with 5 and be 9 digits" }));
-              setIsSubmitting(false);
-              return;
-            }
-
-
-            const fullPhone = `+971${phone}`;
-
-    
-             console.log('Phone validation:', { phone, length: phone.length, test: /^[0-9]{9}$/.test(phone) });
-    
-    // Check if phone_number is exactly 7 digits
-    if (!phone || !/^[0-9]{9}$/.test(phone)) {
-      alert('Please enter a valid 7-digit phone number before submitting.');
-      setFormErrors((prev) => ({ ...prev, phone_number: 'Invalid or incomplete phone number' }));
+    if (!/^[5][0-9]{8}$/.test(phone)) {
+      alert("Please enter a valid UAE mobile number starting with 5 (e.g., 501234567).");
+      setFormErrors((prev) => ({ ...prev, phone_number: "Number must start with 5 and be 9 digits" }));
       setIsSubmitting(false);
       return;
     }
 
+    const fullPhone = `+971${phone}`;
+
+    // Validate required fields
     const errors = {};
-    const requiredFields = ['first_name', 'email', 'phone_number', 'street', 'state', 'city'];
+    const requiredFields = ['first_name', 'last_name', 'email', 'phone_number', 'street', 'state', 'city'];
     requiredFields.forEach((field) => {
       const errorMsg = validateField(field, formData.shipping[field]);
-      if (errorMsg) errors[field] = errorMsg;
+      if (errorMsg) {
+        errors[field] = errorMsg;
+        console.log(`❌ Validation Error - ${field}:`, errorMsg);
+      }
     });
 
     setFormErrors(errors);
@@ -258,15 +253,12 @@ const AddressForm = ({ formData, onChange, onSubmit, onClose, saving, error, car
     }
 
     try {
+      console.log('💾 Saving address to localStorage...');
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(formData));
 
-      // Compose full phone number for backend
-      const fullPhone = `+971${phone}`;
-
-      // small delay to ensure phone input updates last digit
-      await new Promise((res) => setTimeout(res, 200));
-
-      await fetch('https://db.store1920.com/wp-json/abandoned-checkouts/v1/save', {
+      // Save to backend
+      console.log('📤 Sending address to backend...');
+      const response = await fetch('https://db.store1920.com/wp-json/abandoned-checkouts/v1/save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -284,11 +276,31 @@ const AddressForm = ({ formData, onChange, onSubmit, onClose, saving, error, car
         }),
       });
 
+      if (!response.ok) {
+        let errorData;
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          errorData = await response.json();
+        } else {
+          errorData = await response.text();
+        }
+        console.error('❌ Backend error:', errorData);
+        throw new Error(
+          typeof errorData === 'object' && errorData?.message
+            ? errorData.message
+            : 'Failed to save address on backend: ' + errorData
+        );
+      }
+
+      const result = await response.json();
+      console.log('✅ Backend response:', result);
+
       // Directly submit to checkout (no OTP verification)
+      console.log('✅ Address saved successfully, submitting form...');
       onSubmit(formData);
     } catch (err) {
-      console.error('Error saving address:', err);
-      alert('Something went wrong while saving your address.');
+      console.error('❌ Error saving address:', err);
+      alert(`Error: ${err.message || 'Something went wrong while saving your address.'}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -307,17 +319,17 @@ const AddressForm = ({ formData, onChange, onSubmit, onClose, saving, error, car
         justifyContent: 'center',
         alignItems: 'center',
         zIndex: 1000,
-        padding: '24px',
+        padding: '16px',
       }}
     >
       <div
         style={{
           position: 'relative',
           background: '#fff',
-          borderRadius: '18px',
-          width: '96vw',
-          maxWidth: '950px',
-          maxHeight: '96vh',
+          borderRadius: '16px',
+          width: '94vw',
+          maxWidth: isDesktop ? '960px' : '520px',
+          maxHeight: isDesktop ? '88vh' : '92vh',
           overflow: 'hidden',
           padding: 0,
           display: 'flex',
@@ -359,7 +371,7 @@ const AddressForm = ({ formData, onChange, onSubmit, onClose, saving, error, car
             gap: 0,
           }}
         >
-          <h2 style={{ margin: '16px 0 0 0', fontSize: '1.5rem', fontWeight: 700, color: '#333', textAlign: 'center' }}>
+          <h2 style={{ margin: '12px 0 4px 0', fontSize: '1.25rem', fontWeight: 700, color: '#333', textAlign: 'center' }}>
             Edit Address
           </h2>
           <div
@@ -376,8 +388,8 @@ const AddressForm = ({ formData, onChange, onSubmit, onClose, saving, error, car
                 flexDirection: 'row',
                 gap: 0,
                 width: '100%',
-                minHeight: 500,
-                padding: '12px 16px 0 16px',
+                minHeight: 0,
+                padding: '10px 14px 0 14px',
                 boxSizing: 'border-box',
               }}
             >
@@ -429,20 +441,30 @@ const AddressForm = ({ formData, onChange, onSubmit, onClose, saving, error, car
               <div
                 style={{
                   flex: 1.2,
-                  minWidth: 320,
+                  minWidth: 0,
                   background: '#fafbfc',
                   borderRadius: 14,
                   boxShadow: '0 2px 12px #0001',
-                  padding: '32px 28px',
+                  padding: isDesktop ? '22px 20px' : '18px 16px',
                   display: mapSelected ? 'flex' : 'none',
                   flexDirection: 'column',
                   gap: 0,
-                  maxHeight: '76vh',
+                  maxHeight: isDesktop ? '78vh' : '72vh',
                   overflowY: 'auto',
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', marginBottom: 18 }}>
-                  <div style={{ fontWeight: 700, color: '#444', fontSize: '1.1rem', letterSpacing: 0.2, flex: 1 }}>SHIPPING ADDRESS</div>
+                  <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                    <div style={{
+                      width: '7px',
+                      height: '38px',
+                      borderRadius: '12px 0 0 12px',
+                      background: 'linear-gradient(180deg,#ff9800 60%,#ff5500 100%)',
+                      marginRight: '12px',
+                      boxShadow: '0 0 4px #ff980044',
+                    }}></div>
+                    <div style={{ fontWeight: 700, color: '#444', fontSize: '1.1rem', letterSpacing: 0.2, flex: 1 }}>SHIPPING ADDRESS</div>
+                  </div>
                   {/* <button
                     type="button"
                     onClick={() => setMapSelected(false)}
@@ -463,8 +485,8 @@ const AddressForm = ({ formData, onChange, onSubmit, onClose, saving, error, car
                   </button> */}
                 </div>
                 {mapSelected && (
-                    <form onSubmit={saveAddress} noValidate style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '18px' }}>
+                    <form onSubmit={saveAddress} noValidate style={{ display: 'flex', flexDirection: 'column', gap: isDesktop ? '18px' : '16px' }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: `repeat(auto-fit, minmax(${isDesktop ? 260 : 220}px, 1fr))`, gap: isDesktop ? '16px' : '14px' }}>
               {/* Delivery Type Selector at the top of the form */}
         
 
@@ -630,7 +652,7 @@ const AddressForm = ({ formData, onChange, onSubmit, onClose, saving, error, car
               </label>
             </div>
 
-            <label style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.95rem' }}>
               <input
                 type="checkbox"
                 name="saveAsDefault"
@@ -642,7 +664,7 @@ const AddressForm = ({ formData, onChange, onSubmit, onClose, saving, error, car
 
             {error && <div style={{ color: 'red', fontWeight: 600 }}>{error}</div>}
 
-            <div style={{ display: 'flex', gap: 16, marginTop: 8, marginBottom: 8 }}>
+            <div style={{ display: 'flex', gap: isDesktop ? 16 : 12, marginTop: isDesktop ? 10 : 6, marginBottom: isDesktop ? 10 : 6 }}>
               <button
                 type="button"
                 onClick={onClose}
@@ -650,9 +672,9 @@ const AddressForm = ({ formData, onChange, onSubmit, onClose, saving, error, car
                   backgroundColor: '#fff',
                   color: '#1976d2',
                   border: '2px solid #1976d2',
-                  padding: '12px 22px',
-                  fontSize: '1.1rem',
-                  borderRadius: '8px',
+                  padding: isDesktop ? '12px 20px' : '10px 16px',
+                  fontSize: isDesktop ? '1.05rem' : '0.98rem',
+                  borderRadius: isDesktop ? '8px' : '6px',
                   cursor: isSubmitting ? 'not-allowed' : 'pointer',
                   fontWeight: 600,
                   flex: 1,
@@ -666,10 +688,10 @@ const AddressForm = ({ formData, onChange, onSubmit, onClose, saving, error, car
                 style={{
                   backgroundColor: '#1976d2',
                   color: '#fff',
-                  padding: '12px 22px',
-                  fontSize: '1.1rem',
+                  padding: isDesktop ? '12px 20px' : '10px 16px',
+                  fontSize: isDesktop ? '1.05rem' : '0.98rem',
                   border: 'none',
-                  borderRadius: '8px',
+                  borderRadius: isDesktop ? '8px' : '6px',
                   cursor: isSubmitting ? 'not-allowed' : 'pointer',
                   fontWeight: 600,
                   flex: 1,

@@ -61,12 +61,31 @@ export default function OrderSuccess() {
         return;
       }
       setLoading(true);
-      const data = await getOrderById(orderId);
-      setOrder(data);
-      setLoading(false);
+      try {
+        const data = await getOrderById(orderId);
+        console.log('📦 Order found:', data);
+        console.log('💳 Payment Method:', data?.payment_method);
+        console.log('📊 Is Cancelled Param:', isCancelled);
+        
+        // If cancelled=1 BUT payment method is COD, ignore cancelled and show success
+        if (isCancelled && (data?.payment_method === 'cod' || data?.payment_method_title === 'Cash on Delivery')) {
+          console.log('✅ COD Order - Ignoring cancelled parameter, showing success');
+        } else if (isCancelled) {
+          console.log('❌ Non-COD order was cancelled - redirecting to cancel page');
+          navigate(`/order-cancel?order_id=${orderId}`, { replace: true });
+          setLoading(false);
+          return;
+        }
+        
+        setOrder(data);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching order:', error);
+        setLoading(false);
+      }
     }
     fetchOrder();
-  }, [orderId]);
+  }, [orderId, isCancelled, navigate]);
 
   useEffect(() => {
     if (!orderId) {
@@ -119,8 +138,9 @@ export default function OrderSuccess() {
     );
   }
 
-  // Show cancellation message if order is cancelled
-  if (isCancelled) {
+  // Show cancellation message if order is cancelled (but NOT if it's COD)
+  const isCOD = order?.payment_method === 'cod' || order?.payment_method_title === 'Cash on Delivery';
+  if (isCancelled && !isCOD) {
     return (
       <div className="order-success-container">
         <div className="order-success-card">

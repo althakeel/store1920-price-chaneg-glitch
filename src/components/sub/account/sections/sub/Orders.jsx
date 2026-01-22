@@ -64,6 +64,30 @@ const AllOrders = ({
     failed: '#dc3545',
   };
 
+  // Helper function to get display status based on payment method
+  const getDisplayStatus = (order) => {
+    const isCOD = order.payment_method === 'cod';
+    const status = order.status;
+
+    // For COD orders, never show "failed" - show "processing" instead
+    if (isCOD && (status === 'failed' || status === 'pending')) {
+      return 'processing';
+    }
+    return status;
+  };
+
+  // Helper function to get display status color based on payment method
+  const getDisplayStatusColor = (order) => {
+    const displayStatus = getDisplayStatus(order);
+    return orderStatusColors[displayStatus] || '#000';
+  };
+
+  // Helper function to get display label based on payment method
+  const getDisplayStatusLabel = (order) => {
+    const displayStatus = getDisplayStatus(order);
+    return orderStatusLabels[displayStatus] || displayStatus;
+  };
+
   const getExpectedDeliveryDate = (order) => {
     try {
       const date = new Date(order.date_created);
@@ -336,8 +360,8 @@ const AllOrders = ({
 
           <div className="order-header-simple">
             <div>
-              <strong style={{ color: orderStatusColors[order.status] || '#000' }}>
-                Order {orderStatusLabels[order.status] || order.status}
+              <strong style={{ color: getDisplayStatusColor(order) }}>
+                Order {getDisplayStatusLabel(order)}
               </strong> | Email sent to <span>{order.billing.email}</span> on{' '}
               {new Date(order.date_created).toLocaleDateString()}
             </div>

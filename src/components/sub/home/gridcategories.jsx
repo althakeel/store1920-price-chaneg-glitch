@@ -11,10 +11,10 @@ import grid2 from "../../../assets/images/gridhome/2.png";
 import grid3 from "../../../assets/images/gridhome/3.png";
 import grid4 from "../../../assets/images/gridhome/4.png";
 
-import Static1 from '../../../assets/images/stattic/static1.png'
-import Static2 from '../../../assets/images/stattic/static2.jpg'
-import Static3 from '../../../assets/images/stattic/static3.jpg'
-import Static4 from '../../../assets/images/stattic/static4.jpg'
+import Static1 from '../../../assets/images/staticproducts/gamekit/1.webp'
+import Static2 from '../../../assets/images/staticproducts/minproject/2.webp'
+import Static3 from '../../../assets/images/staticproducts/airbed/6.webp'
+import Static4 from '../../../assets/images/staticproducts/pruningmachine/1.webp'
 
 // WooCommerce API credentials
 const API_BASE = "https://db.store1920.com/wp-json/wc/v3";
@@ -33,30 +33,30 @@ const staticCategories = [
 const initialProductPlaceholders = [
   { 
     id: 128574, 
-    slug: "ip68-universal-waterproof-phone-cases-bag-for-iphone-16-15-14-13-12-11-pro-max-x-xiaomi-samsung-s24-ultra-swim-cover-accessories", 
-    name: "IP68 Universal Waterproof Phone Cases Bag For iP", 
-    price: "8.16",  
+    slug: "/gamebox-64-retro-console-20000-preloaded-games-4k-hdmi-wireless-controllers", 
+    name: "GameBox 64 Retro Console – 20,000+ Preloaded Games with 4K HDMI & Wireless Controllers", 
+    price: "79.90",  
     images: [{ src: Static1 }]  
   },
   { 
     id: 126009, 
-    slug: "ibudim-bike-phone-holder-360-rotation-bicycle-phone-holder-for-4-7-7-0-inch-devices-motorcycle-handlebar-mobile-phone-stand", 
-    name: "iBudim Bike Phone Holder 360 Rotation Bicycle Phone Holder for 4.7-7.0 inc", 
-    price: "22.17", 
+    slug: "mini-portable-smart-projector", 
+    name: "Mini Portable Smart Projector", 
+    price: "149.90", 
     images: [{ src: Static2 }] 
   },
   { 
     id: 125961, 
-    slug: "portable-mini-selfie-fill-light-rechargeable-3-modes-adjustable-brightness-clip-on-for-mobile-phone-make-up-computer-fill-light", 
-    name: "Portable Mini Selfie Fill Light Rechargeable 3 Modes Adjustable Brightness C", 
-    price: "58.16", 
+    slug: "twin-size-air-mattress-with-built-in-rechargeable-pump-16-self-inflating-blow-up-bed-for-home-camping-guests", 
+    name: "Twin Size Air Mattress with Built-in Rechargeable Pump – 16 Self-Inflating Blow Up Bed for Home, Camping & Guests", 
+    price: "179.00", 
     images: [{ src: Static3 }] 
   },
   { 
     id: 125925, 
-    slug: "multifunction-6-in-1-otg-sd-card-reader-usb2-0-type-c-tf-sd-memory-card-smart-cardreader-for-laptop-accessories-adapter", 
-    name: "Multifunction 6 in 1 OTG SD Card Reader USB2.0 Type-C/TF/SD Memory Card", 
-    price: "11.47", 
+    slug: "trimpro-21v-cordless-electric-pruning-shears", 
+    name: "TrimPro™ 21V Cordless Electric Pruning Shears", 
+    price: "119.90", 
     images: [{ src: Static4 }] 
   },
 ];
@@ -87,12 +87,28 @@ const useCountdown = (targetDate) => {
   return timeLeft;
 };
 
+// Calculate next 2 AM
+const getNext2AM = () => {
+  const now = new Date();
+  const next2AM = new Date();
+  
+  // Set to 2 AM today
+  next2AM.setHours(2, 0, 0, 0);
+  
+  // If current time is past 2 AM, set to 2 AM tomorrow
+  if (now >= next2AM) {
+    next2AM.setDate(next2AM.getDate() + 1);
+  }
+  
+  return next2AM.getTime();
+};
+
 const GridCategories = () => {
   const [products, setProducts] = useState(initialProductPlaceholders);
   const [banners, setBanners] = useState([]);
   const [currentBanner, setCurrentBanner] = useState(0);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-  const [targetDate] = useState(new Date().getTime() + 24 * 60 * 60 * 1000);
+  const [targetDate] = useState(getNext2AM());
 
   const { addToCart, cartItems } = useCart();
   const navigate = useNavigate();
@@ -158,7 +174,7 @@ const GridCategories = () => {
         <div className="gcx-left-grid">
           {staticCategories.map((cat) => (
             <div key={cat.id} className="gcx-category-card" onClick={() => navigate(cat.link)}>
-              <img src={cat.image || PlaceHolderImage} alt={cat.name} style={{ objectFit: "fill" }} />
+              <img src={cat.image || PlaceHolderImage} alt={cat.name} />
               <div className="gcx-cat-info">
                 <h4>{cat.name}</h4>
               </div>
@@ -184,7 +200,7 @@ const GridCategories = () => {
 
             return (
               <div key={prod.id || `ph-${idx}`} className="gcx-product-card"
-                onClick={() => prod.id && navigate(`/product/${prod.slug}`)}>
+                onClick={() => prod.id && navigate(`/products/${prod.slug}`)}>
                 <img
                   src={prod?.images?.[0]?.src || PlaceHolderImage}
                   alt={prod?.name || "Product"}

@@ -56,6 +56,7 @@ export default function CheckoutPage() {
 
 
   const [cartItems, setCartItems] = useState([]);
+  const [showForm, setShowForm] = useState(false); // controls address popup
   const [countries, setCountries] = useState([]);
   const [paymentMethods, setPaymentMethods] = useState([]);
   const [formData, setFormData] = useState({
@@ -436,8 +437,9 @@ meta_data: [
       orderId={orderId}
       formData={formData}
       setFormData={setFormData}
-      handlePlaceOrder={handlePlaceOrder}
       createOrder={createOrder}
+      showForm={showForm}
+      setShowForm={setShowForm}
     />
     <CheckoutRight
       cartItems={cartItems}
@@ -447,6 +449,7 @@ meta_data: [
       clearCart={() => setCartItems([])}
       handlePlaceOrder={handlePlaceOrder}
       subtotal={subtotal}
+      showForm={showForm}
     />
   </div>
 </div>

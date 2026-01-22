@@ -1,7 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import Truck from "../assets/images/common/truck.png";
 
 const TrackDeepOrder = () => {
+  const location = useLocation();
   const [orderId, setOrderId] = useState("");
   const [orderDetails, setOrderDetails] = useState(null);
   const [logs, setLogs] = useState([]);
@@ -190,6 +192,114 @@ const TrackDeepOrder = () => {
 
   const removeImage = (index) => {
     setRrImages((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // Auto-fill and auto-track when order_id is in URL
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const orderIdFromUrl = queryParams.get('order_id');
+    
+    if (orderIdFromUrl) {
+      console.log('🔍 Auto-filling order ID from URL:', orderIdFromUrl);
+      setOrderId(orderIdFromUrl);
+      
+      // Auto-trigger tracking after a short delay to ensure state is set
+      setTimeout(() => {
+        console.log('🚀 Auto-triggering track order...');
+        // Manually trigger the fetch with the order ID from URL
+        triggerAutoTrack(orderIdFromUrl);
+      }, 100);
+    }
+  }, [location.search]);
+
+  // Helper function to trigger tracking programmatically
+  const triggerAutoTrack = async (trackingId) => {
+    if (!trackingId.trim()) return;
+
+    setHasSearched(true);
+    setLoading(true);
+
+    // reset
+    setErrorMsg("");
+    setOrderDetails(null);
+    setLogs([]);
+    setTruckPosition(0);
+    setStatusResults(null);
+    setRrSuccessMsg("");
+    setRrErrorMsg("");
+
+    setHasTrackingData(false);
+    setOrderExistsOnly(false);
+
+    const tracking = trackingId.trim();
+
+    // 1️⃣ Try C3X tracking first
+    let gotC3X = false;
+
+    try {
+      const response = await fetch(
+        "https://db.store1920.com/wp-json/custom/v1/track-c3x-reference",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ TrackingAWB: tracking }),
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+
+        if (data?.AirwayBillTrackList?.length) {
+          const trackingData = data.AirwayBillTrackList[0];
+
+          if (trackingData?.AirWayBillNo) {
+            gotC3X = true;
+
+            setOrderDetails(trackingData);
+            const logArr = trackingData.TrackingLogDetails || [];
+            setLogs(logArr);
+
+            const progress = parseInt(trackingData.ShipmentProgress ?? 0);
+            setTruckPosition(Number.isFinite(progress) ? progress : 0);
+
+            setHasTrackingData(true);
+            setOrderExistsOnly(false);
+
+            try {
+              await fetchRRStatus(trackingData.AirWayBillNo);
+            } catch {}
+
+            setLoading(false);
+            return;
+          }
+        }
+      }
+    } catch (err) {
+      console.error("C3X Tracking Error:", err);
+    }
+
+    // 2️⃣ If NO tracking data found, check if order exists in our system
+    if (!gotC3X) {
+      const exists = await checkOrderExists(tracking);
+
+      if (exists) {
+        setHasTrackingData(false);
+        setOrderExistsOnly(true);
+        setTruckPosition(0);
+        setOrderDetails(null);
+        setLogs([]);
+        setLoading(false);
+        return;
+      }
+
+      // 3️⃣ Order not found
+      setHasTrackingData(false);
+      setOrderExistsOnly(false);
+      setOrderDetails(null);
+      setLogs([]);
+    }
+
+    setLoading(false);
   };
 
   const submitReturnRequest = async () => {

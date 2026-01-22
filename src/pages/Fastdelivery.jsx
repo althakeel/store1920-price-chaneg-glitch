@@ -14,6 +14,8 @@ import Product12 from '../assets/images/staticproducts/Boxing Machine/1.webp'
 import Product13 from '../assets/images/staticproducts/CCTV Camera/1.webp'
 import Product14 from '../assets/images/staticproducts/drill-machine/2.webp'
 import Product15 from '../assets/images/staticproducts/wrinkle-remover/10.webp'
+import Product16 from '../assets/images/staticproducts/massager/3.webp'
+import product17 from '../assets/images/staticproducts/wirelesscharger/GNPTRIOWCGY-2998.webp'
 
 const staticProducts = [
    
@@ -34,9 +36,9 @@ const staticProducts = [
     {
     id: "drill-kit-with-2-battery–ultimate-cordless-power-tool-set",
     name: "Drill Kit with 2 Battery – Ultimate Cordless Power Tool Set",
-    price: "109.00",
+    price: "109.90",
     regular_price: "150.  ",
-    sale_price: "109.00",
+    sale_price: "109.90",
     images: [{ src: Product14 }],
     
     path: "/products/drill-kit-with-2-battery–ultimate-cordless-power-tool-set",
@@ -72,9 +74,9 @@ const staticProducts = [
   {
     id: "Mini Portable Smart Projector",
     name: "Mini Portable Smart Projector",
-    price: "179.00",
+    price: "149.90",
     regular_price: "329.00",
-    sale_price: "179.00",
+    sale_price: "149.90",
     images: [{ src: Product11 }],
     path: "/products/mini-portable-smart-projector",
     rating: 5,
@@ -96,9 +98,9 @@ const staticProducts = [
   {
     id: "twin-size-air-mattress-with-built-in-rechargeable-pump",
     name: "Twin Size Air Mattress with Built-in Rechargeable Pump – Self-Inflating Blow Up Bed",
-    price: "179.00",
+    price: "159.90",
     regular_price: "189.0",
-    sale_price: "179.00",
+    sale_price: "159.90",
     images: [{ src: Product2 }],
     path: "/products/twin-size-air-mattress-with-built-in-rechargeable-pump-16-self-inflating-blow-up-bed-for-home-camping-guests",
     rating: 5,
@@ -108,9 +110,9 @@ const staticProducts = [
   {
     id: "850w-electric-paint-sprayer-uae",
     name: "Electric Paint Sprayer",
-    price: "114.9",
+    price: "99.90",
     regular_price: "250.0",
-    sale_price: "114.9",
+    sale_price: "99.90",
     images: [{ src: Product3 }],
     path: "/products/850w-electric-paint-sprayer-uae",
     rating: 5,
@@ -120,9 +122,9 @@ const staticProducts = [
   {
     id: "5",
     name: "TrimPro™ 21V Cordless Electric Pruning Shears",
-    price: "139.00",
+    price: "119.90",
     regular_price: "250.0",
-    sale_price: "139.00",
+    sale_price: "119.90",
     images: [{ src: Product4 }],
     path: "/products/trimpro-21v-cordless-electric-pruning-shears",
     rating: 5,
@@ -132,9 +134,9 @@ const staticProducts = [
   {
     id: "6",
     name: "GameBox 64 Retro Console – 20,000+ Games, 4K HDMI, Wireless Controllers",
-    price: "89.00",
+    price: "79.90",
     regular_price: "96.0",
-    sale_price: "89.00",
+    sale_price: "79.90",
     images: [{ src: Product5 }],
     path: "/products/gamebox-64-retro-console-20000-preloaded-games-4k-hdmi-wireless-controllers",
     rating: 5,
@@ -143,10 +145,10 @@ const staticProducts = [
   },
   {
     id: "7",
-    name: "Cordless 2-in-1 Leaf Blower",
-    price: "69.90",
+    name: "Cordless Leaf Blower",
+    price: "59.90",
     regular_price: "189.00",
-    sale_price: "69.90",
+    sale_price: "59.90",
     images: [{ src: Product7 }],
     path: "/products/cordless-2-in-1-leaf-blower-vacuum",
     rating: 5,
@@ -156,9 +158,9 @@ const staticProducts = [
     {
     id: "8",
     name: "Turbo Cordless Leaf Blower – 21V Power for Every Task",
-    price: "64.90",
+    price: "49.90",
     regular_price: "99.98",
-    sale_price: "64.90",
+    sale_price: "49.90",
     images: [{ src: Product8 }],
     path: "/products/turbo-cordless-leaf-blower-21v-power-for-every-task",
     rating: 5,
@@ -168,9 +170,9 @@ const staticProducts = [
       {
     id: "9",
     name: "Steam Cleaner DF-A001 – Japan Technology",
-    price: "99.00",
+    price: "89.90",
     regular_price: "129.70",
-    sale_price: "99.00",
+    sale_price: "89.90",
     images: [{ src: Product9 }],
     path: "/products/steam-cleaner-df-a001-japan-technology",
     rating: 5,
@@ -180,14 +182,38 @@ const staticProducts = [
   {
     id: "10",
     name: "Electric Grape & Garlic Peeling Machine",
-    price: "99.00",
+    price: "89.90",
     regular_price: "100",
-    sale_price: "99.00",
+    sale_price: "89.90",
     images: [{ src: Product10 }],
     path: "/products/electric-grape-garlic-peeling-machine",
     rating: 5,
     reviews: 199,
     sold: 305,
+  },
+   {
+    id: "11",
+    name: "Heated Shiatsu Massager – Human-Like Neck & Back Relief Anywhere",
+    price: "139.00",
+    regular_price: "199.00",
+    sale_price: "139.00",
+    images: [{ src: Product16 }],
+    path: "/products/heated-shiatsu-massager-human-like-neck-back-relief-anywhere",
+    rating: 5,
+    reviews: 182,
+    sold: 285,
+  },
+   {
+    id: "12",
+    name: "Green Lion Power Trio – 3-in-1 Magnetic Wireless Charger",
+    price: "149.00",
+    regular_price: "199.00",
+    sale_price: "149.00",
+    images: [{ src: product17 }],
+    path: "/products//green-lion-power-trio-3-in-1-magnetic-wireless-charger",
+    rating: 5,
+    reviews: 165,
+    sold: 195,
   },
 ];
 
