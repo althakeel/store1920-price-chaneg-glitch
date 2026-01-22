@@ -15,7 +15,7 @@ import Product13 from '../assets/images/staticproducts/CCTV Camera/1.webp'
 import Product14 from '../assets/images/staticproducts/drill-machine/2.webp'
 import Product15 from '../assets/images/staticproducts/wrinkle-remover/10.webp'
 import Product16 from '../assets/images/staticproducts/massager/3.webp'
-
+import product17 from '../assets/images/staticproducts/wirelesscharger/GNPTRIOWCGY-2998.webp'
 
 const staticProducts = [
    
@@ -193,7 +193,7 @@ const staticProducts = [
   },
    {
     id: "11",
-    name: "Heated Shiatsu Massager ",
+    name: "Heated Shiatsu Massager – Human-Like Neck & Back Relief Anywhere",
     price: "139.00",
     regular_price: "199.00",
     sale_price: "139.00",
@@ -201,7 +201,19 @@ const staticProducts = [
     path: "/products/heated-shiatsu-massager-human-like-neck-back-relief-anywhere",
     rating: 5,
     reviews: 182,
-    sold: 85,
+    sold: 285,
+  },
+   {
+    id: "12",
+    name: "Green Lion Power Trio – 3-in-1 Magnetic Wireless Charger",
+    price: "149.00",
+    regular_price: "199.00",
+    sale_price: "149.00",
+    images: [{ src: product17 }],
+    path: "/products//green-lion-power-trio-3-in-1-magnetic-wireless-charger",
+    rating: 5,
+    reviews: 165,
+    sold: 195,
   },
 ];
 
