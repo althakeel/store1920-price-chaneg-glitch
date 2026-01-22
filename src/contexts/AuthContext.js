@@ -2,6 +2,8 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { signOut } from "firebase/auth";
 import { auth } from "../utils/firebase";
+import axios from 'axios';
+import { getRedirectResult } from "firebase/auth";
 
 const AuthContext = createContext();
 
@@ -69,12 +71,76 @@ export const AuthProvider = ({ children }) => {
     }
   }, [user]);
 
+  // const login = (userData) => {
+  //   console.log('Login called with userData:', userData);
+  //   setUser(userData);
+  //   // 🔑 Important: force storage event so other tabs update immediately
+  //   localStorage.setItem("loginEvent", Date.now());
+  // };
   const login = (userData) => {
-    console.log('Login called with userData:', userData);
-    setUser(userData);
-    // 🔑 Important: force storage event so other tabs update immediately
-    localStorage.setItem("loginEvent", Date.now());
+  setUser(userData);
+
+  // 🔥 IMPORTANT: Login user into WordPress
+  axios.post(
+    'https://db.store1920.com/wp-json/custom/v3/login-by-email',
+    { email: userData.email },
+    { withCredentials: true }
+  ).catch(err => {
+    console.error('WP login failed', err);
+  });
+
+  localStorage.setItem("loginEvent", Date.now());
+};
+
+useEffect(() => {
+  const handleGoogleRedirect = async () => {
+    try {
+      const result = await getRedirectResult(auth);
+
+      if (!result || !result.user) return;
+
+      const user = result.user;
+
+      // 🔗 Sync with WordPress backend
+      const res = await axios.post(
+        "https://db.store1920.com/wp-json/custom/v1/google-login",
+        {
+          email: user.email,
+          name: user.displayName || user.email.split("@")[0],
+          firebase_uid: user.uid,
+          photo_url: user.photoURL,
+        },
+        {
+          withCredentials: true,
+          timeout: 10000,
+        }
+      );
+
+      const userInfo = {
+        id: res.data.user_id || res.data.id,
+        name: user.displayName,
+        email: user.email,
+        token: res.data.token || "wordpress_session",
+        image: user.photoURL,
+        firebaseUid: user.uid,
+      };
+
+      // ✅ Save session
+      localStorage.setItem("userData", JSON.stringify(userInfo));
+      localStorage.setItem("userId", userInfo.id);
+      localStorage.setItem("email", userInfo.email);
+      if (userInfo.token) localStorage.setItem("token", userInfo.token);
+
+      // ✅ Update context
+      setUser(userInfo);
+
+    } catch (err) {
+      console.error("Google redirect handling failed:", err);
+    }
   };
+
+  handleGoogleRedirect();
+}, []);
 
 const logout = async () => {
   try {
@@ -94,6 +160,8 @@ const logout = async () => {
   // Trigger logout event for other tabs
   localStorage.setItem("logoutEvent", Date.now());
 };
+
+
 
   // Also listen for custom login/logout events
   useEffect(() => {

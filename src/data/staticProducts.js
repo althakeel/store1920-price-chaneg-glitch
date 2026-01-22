@@ -1406,7 +1406,7 @@ const staticProducts = [
     section3points: [
       "Home & Garage Cleaning",
       "Lawn, Patio, and Garden Leaves",
-      "  Car Engine Dust & Interior Vacuuming",
+      "  Car Engine Dust & Interior",
       "  Pet Hair & Light Debris Removal",
     ],
 
@@ -1430,12 +1430,7 @@ const staticProducts = [
           others: false,
         },
         { feature: "17000 RPM Turbo Power", lumineux: true, others: false },
-        {
-          feature: "Dual Batteries + Fast Charger",
-          lumineux: true,
-          others: false,
-        },
-        { feature: "Lightweight (1.5kg)", lumineux: true, others: false },
+        { feature: "Lightweight", lumineux: true, others: false },
         {
           feature: "Multi-purpose Home & Car Use",
           lumineux: true,
@@ -1465,15 +1460,11 @@ const staticProducts = [
         stars: 5,
       },
       {
-        text: "Love the vacuum function. Cleans pet hair from sofa and car in minutes.",
+        text: "Love the  function. Cleans pet hair from sofa and car in minutes.",
         author: "Fatima A., Sharjah",
         stars: 5,
       },
-      {
-        text: "The dual batteries last long enough for my whole garden. Easy to use and super powerful.",
-        author: "Ali K., Abu Dhabi ",
-        stars: 5,
-      },
+     
     ],
 
     // section4Data: [
@@ -1492,13 +1483,13 @@ const staticProducts = [
     slug: "turbo-cordless-leaf-blower-21v-power-for-every-task",
     price: 49.90,
     description:
-      "Lightweight | Powerful Turbine Motor | Dual Battery Option | Adjustable Speed",
+      "Lightweight | Powerful Turbine Motor | Dual Battery Option ",
     shortdesc:
       "Introducing the Turbo Cordless Leaf Blower — your all-in-one solution for cleaning driveways, patios, cars, and gardens.",
     subdesc: " Lightweight & easy to handle",
     subdesc1: "Available in Single or Dual Battery models",
     subdesc2: "Powerful turbine motor for maximum airflow",
-    subdesc3: " Adjustable speed for precision cleaning",
+    // subdesc3: " Adjustable speed for precision cleaning",
     subdesc4: "Ideal for homes, gardens & car drying",
 
     image: Products119,
@@ -1587,7 +1578,7 @@ const staticProducts = [
           lumineux: true,
           others: false,
         },
-        { feature: "Adjustable Airflow Speed", lumineux: true, others: false },
+       
         {
           feature: "Dual Battery Option Available",
           lumineux: true,

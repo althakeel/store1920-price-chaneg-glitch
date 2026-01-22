@@ -7,7 +7,7 @@ import ProcessingOrders from './sub/processingorder';
 import ShippedOrder from './sub/shippedorder';
 import OrderDelivered from './sub/OrderDelivered';
 import OrderReturns from './sub/OrderReturns';
-
+import Wallet from './Wallet';  
 
 const API_BASE_URL = 'https://db.store1920.com/wp-json/wc/v3/orders';
 const API_AUTH = {
@@ -27,53 +27,144 @@ const OrderSection = ({ userId }) => {
   const navigate = useNavigate();
 
   const orderStatuses = [
-    { label: 'All orders', value: '' },
-    { label: 'Processing', value: 'processing' },
-    { label: 'Shipped', value: 'shipped' },
-    { label: 'Delivered', value: 'completed' },
-    { label: 'Returns', value: 'refunded' },
-  ];
+  { label: 'All orders', value: 'all' },
+  { label: 'Processing', value: 'processing' },
+  { label: 'Shipped', value: 'shipped' },
+  { label: 'Delivered', value: 'delivered' },
+  { label: 'Returns', value: 'returns' },
+   { label: 'Wallet', value: 'wallet' }, 
+];
 
-  const fetchOrders = async () => {
-    if (!userId) {
-      setError('User not logged in.');
-      setOrders([]);
-      setLoading(false);
-      return;
+
+  // const fetchOrders = async () => {
+  //   if (!userId) {
+  //     setError('User not logged in.');
+  //     setOrders([]);
+  //     setLoading(false);
+  //     return;
+  //   }
+
+  //   setLoading(true);
+  //   setError(null);
+
+  //   try {
+  //     const params = { customer: userId };
+
+  //     // WooCommerce API doesn't support shipped filter directly
+  //     if (activeStatus && activeStatus !== 'shipped') {
+  //       params.status = activeStatus;
+  //     }
+
+  //     const response = await axios.get(API_BASE_URL, {
+  //       auth: API_AUTH,
+  //       params,
+  //     });
+
+  //     let fetchedOrders = response.data || [];
+
+  //     // Client-side filtering for shipped
+  //     if (activeStatus === 'shipped') {
+  //       fetchedOrders = fetchedOrders.filter(order => order.status === 'shipped');
+  //     }
+
+  //     setOrders(fetchedOrders);
+  //   } catch (err) {
+  //     const message = err.response?.data?.message || err.message || 'Unknown error';
+  //     setError(`Failed to load orders: ${message}`);
+  //     setOrders([]);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+
+const fetchOrders = async () => {
+  if (!userId) {
+    setError('User not logged in.');
+    setOrders([]);
+    setLoading(false);
+    return;
+  }
+
+  setLoading(true);
+  setError(null);
+
+  try {
+    const params = {
+      customer: userId,
+      per_page: 50,
+    };
+
+    // 🔥 TAB → STATUS MAPPING
+    switch (activeStatus) {
+
+      case 'processing':
+  // 🔥 fetch broad set (API-safe)
+        params.status = [
+          'pending', 
+          'processing',
+          'on-hold',
+          'cod', 
+        ].join(',');
+        break;
+
+
+      case 'shipped':
+        params.status = 'shipped';
+        break;
+
+      case 'delivered':
+        params.status = 'completed';
+        break;
+
+      case 'returns':
+        params.status = [
+          'return-request',
+          'return-approved',
+          'return-rejected',
+        ].join(',');
+        break;
+
+      case 'all':
+      default:
+        params.status = [
+          'pending',
+          'processing',
+          'cod',
+          'confirmed',
+          'on-hold',
+          'shipped',
+          'completed',
+          'return-request',
+          'return-approved',
+          'return-rejected',
+          'cancelled',
+          'failed',
+          'refunded',
+          'delivery-failed',
+          'closed',
+          'paid',
+          'ready-to-pickup',
+          'pickup-requested',
+        ].join(',');
+        break;
     }
 
-    setLoading(true);
-    setError(null);
+    const response = await axios.get(API_BASE_URL, {
+      auth: API_AUTH,
+      params,
+    });
 
-    try {
-      const params = { customer: userId };
+    setOrders(response.data || []);
+  } catch (err) {
+    const message = err.response?.data?.message || err.message || 'Unknown error';
+    setError(`Failed to load orders: ${message}`);
+    setOrders([]);
+  } finally {
+    setLoading(false);
+  }
+};
 
-      // WooCommerce API doesn't support shipped filter directly
-      if (activeStatus && activeStatus !== 'shipped') {
-        params.status = activeStatus;
-      }
-
-      const response = await axios.get(API_BASE_URL, {
-        auth: API_AUTH,
-        params,
-      });
-
-      let fetchedOrders = response.data || [];
-
-      // Client-side filtering for shipped
-      if (activeStatus === 'shipped') {
-        fetchedOrders = fetchedOrders.filter(order => order.status === 'shipped');
-      }
-
-      setOrders(fetchedOrders);
-    } catch (err) {
-      const message = err.response?.data?.message || err.message || 'Unknown error';
-      setError(`Failed to load orders: ${message}`);
-      setOrders([]);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   useEffect(() => {
     fetchOrders();
@@ -212,6 +303,8 @@ const OrderSection = ({ userId }) => {
           cancelOrder={cancelOrder}
         />
         );
+         case 'wallet':
+        return <Wallet userId={userId} />;
 
       default:
         return (

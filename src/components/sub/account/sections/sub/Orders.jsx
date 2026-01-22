@@ -41,6 +41,7 @@ const AllOrders = ({
   const [returningOrder, setReturningOrder] = useState(null);
   const [selectedReason, setSelectedReason] = useState('');
   const [otherReason, setOtherReason] = useState('');
+  const [returnImages, setReturnImages] = useState([]);
 
   const { addToCart } = useCart();
 
@@ -233,41 +234,110 @@ const AllOrders = ({
     }
   };
 
-  const handleReturnProduct = async () => {
-    if (!returningOrder) return;
-    const reason = selectedReason === 'Other' ? otherReason : selectedReason;
-    if (!reason) return toast.error('Please select or enter a reason');
-    try {
-      const res = await axios.post('https://db.store1920.com/wp-json/custom/v1/return-order', {
-        order_id: returningOrder.id,
-        reason,
-      });
-      if (res.data.success) {
-        toast.success('Return request submitted!');
-        setReturningOrder(null);
-        setSelectedReason('');
-        setOtherReason('');
-      } else {
-        toast.error('Failed to submit return request');
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error('Error submitting return request');
-    }
-  };
+//   const handleReturnProduct = async () => {
+//   if (!returningOrder) return;
 
-  const canReturn = (order) => {
-    if (order.status !== 'completed') return false;
-    const deliveredDate = new Date(order.date_created);
-    deliveredDate.setDate(deliveredDate.getDate() + 7);
-    const now = new Date();
-    const diffDays = Math.floor((now - deliveredDate) / (1000 * 60 * 60 * 24));
-    return diffDays <= 10;
-  };
+//   const reason = selectedReason === 'Other' ? otherReason : selectedReason;
+//   if (!reason) return toast.error('Please select or enter a reason');
+
+//   const formData = new FormData();
+//   formData.append('order_id', returningOrder.id);
+//   formData.append('reason', reason);
+//   formData.append('email', returningOrder.billing.email);
+
+//   returnImages.forEach((file) => {
+//     formData.append('images[]', file);
+//   });
+
+//   try {
+//     const res = await axios.post(
+//       'https://db.store1920.com/wp-json/custom/v1/return-order',
+//       formData,
+//       {
+//         headers: { 'Content-Type': 'multipart/form-data' },
+//       }
+//     );
+
+//     if (res.data.success) {
+//       toast.success('Return request submitted!');
+//       setReturningOrder(null);
+//       setSelectedReason('');
+//       setOtherReason('');
+//       setReturnImages([]);
+//     } else {
+//       toast.error(res.data.message || 'Failed to submit return request');
+//     }
+//   } catch (err) {
+//     console.error(err);
+//     toast.error('Error submitting return request');
+//   }
+// };
+
+const handleReturnProduct = async () => {
+  if (!returningOrder) return;
+
+  if (returnImages.length === 0) {
+    toast.error('Please upload at least one image');
+    return;
+  }
+
+  if (returnImages.length > 5) {
+    toast.error('You can upload up to 5 images only');
+    return;
+  }
+
+  const reason = selectedReason === 'Other' ? otherReason : selectedReason;
+  if (!reason) {
+    toast.error('Please select or enter a reason');
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('order_id', returningOrder.id);
+  formData.append('reason', reason);
+  formData.append('email', returningOrder.billing.email);
+
+  returnImages.forEach((file) => {
+    formData.append('images[]', file);
+  });
+
+  try {
+    const res = await axios.post(
+      'https://db.store1920.com/wp-json/custom/v1/return-order',
+      formData
+    );
+
+    if (res.data.success) {
+      toast.success('Return request submitted!');
+      setReturningOrder(null);
+      setSelectedReason('');
+      setOtherReason('');
+      setReturnImages([]);
+    } else {
+      toast.error(res.data.message || 'Failed to submit return request');
+    }
+  } catch (err) {
+    console.error(err);
+    toast.error('Error submitting return request');
+  }
+};
+
+const canReturn = (order) => {
+  const deliveredDate = new Date(order.date_created);
+  const returnDeadline = new Date(deliveredDate);
+  returnDeadline.setDate(returnDeadline.getDate() + 10);
+
+  return new Date() <= returnDeadline;
+};
 
   return (
     <div className="order-list">
-      <ToastContainer position="bottom-center" autoClose={2000} hideProgressBar />
+      <ToastContainer
+      position="top-center"
+      autoClose={2500}
+      hideProgressBar
+      newestOnTop
+    />
 
       {editingOrder && (
         <AddressForm
@@ -293,6 +363,7 @@ const AllOrders = ({
 
       {returningOrder && (
         <div className="return-modal-overlay">
+          {/* <ToastContainer position="bottom-center" autoClose={2000} hideProgressBar /> */}
           <div className="return-modal">
             <h2>Return Product - PO-{returningOrder.id}</h2>
             <p>Please select a reason for returning this product:</p>
@@ -319,6 +390,22 @@ const AllOrders = ({
                 />
               )}
             </div>
+              <div style={{ marginTop: '10px' }}>
+                    <label style={{ fontWeight: '600' }}>
+                      Upload Images (optional)
+                    </label>
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={(e) => setReturnImages(Array.from(e.target.files))}
+              style={{ display: 'block', marginTop: '6px' }}
+            />
+            <small style={{ color: '#777' }}>
+              You can upload up to 5 images
+            </small>
+          </div>
+
 
             <div className="return-modal-actions">
               <button className="btn-primary" onClick={handleReturnProduct}>
@@ -336,10 +423,14 @@ const AllOrders = ({
       )}
 
       {orders.map((order) => (
+              console.log('ORDER STATUS:', order.id, order.status),
         <div key={order.id} 
+  
+
           className={`order-card-simple ${order.status === 'cancelled' ? 'order-cancelled' : ''}`}>
           
           {order.status === 'cancelled' && (
+            
             <div className="cancelled-overlay">
                   <div className="cancel-text-box">
               <div className="cancel-info-title">Order Cancelled</div>
@@ -432,7 +523,7 @@ const AllOrders = ({
           </div>
 
           <div className="order-actions-simple">
-            <button className="btn-outline" onClick={() => openEditAddress(order)}>Change address</button>
+            {/* <button className="btn-outline" onClick={() => openEditAddress(order)}>Change address</button> */}
             <button className="btn-secondary" onClick={() => handleBuyAgain(order.line_items, order.id)} disabled={buyingAgainOrderId === order.id}>
               {buyingAgainOrderId === order.id ? 'Adding...' : 'Buy this again'}
             </button>
@@ -442,7 +533,7 @@ const AllOrders = ({
                 {cancellingOrderId === order.id ? 'Cancelling...' : 'Cancel items'}
               </button>
             )}
-            {order.status === 'completed' && (
+             {order.status === 'completed' && (
               <>
                 <button className="btn-outline" onClick={() => generateInvoicePDF(order)}>Download Invoice</button>
                 {canReturn(order) && (
@@ -450,6 +541,7 @@ const AllOrders = ({
                 )}
               </>
             )}
+             
           </div>
         </div>
       ))}

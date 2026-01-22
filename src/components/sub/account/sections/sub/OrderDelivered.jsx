@@ -53,28 +53,44 @@ const OrderDelivered = ({ orders, handleProductClick, slugify, viewOrderDetails 
     }
   };
 
-  const submitReturnRequest = async () => {
-    if (!selectedReason) return toast.error('Please select a reason');
-    const reason = selectedReason === 'Other' ? otherReason.trim() : selectedReason;
-    if (!reason) return toast.error('Please enter a reason');
+ const submitReturnRequest = async () => {
+  if (!selectedReason) return toast.error('Please select a reason');
 
-    setSubmittingReturn(true);
-    try {
-      await axios.post('/wp-json/custom/v1/return-order/', {
-        order_id: returningOrder.id,
-        reason,
-      });
+  const reason =
+    selectedReason === 'Other' ? otherReason.trim() : selectedReason;
+
+  if (!reason) return toast.error('Please enter a reason');
+
+  setSubmittingReturn(true);
+
+  const formData = new FormData();
+  formData.append('order_id', returningOrder.id);
+  formData.append('reason', reason);
+  formData.append('email', returningOrder.billing.email);
+
+  try {
+    const res = await axios.post(
+      'https://db.store1920.com/wp-json/custom/v1/return-order',
+      formData,
+      { headers: { 'Content-Type': 'multipart/form-data' } }
+    );
+
+    if (res.data.success) {
       toast.success('Return request submitted!');
       setReturningOrder(null);
       setSelectedReason('');
       setOtherReason('');
-    } catch (err) {
-      console.error(err);
-      toast.error('Failed to submit return request');
-    } finally {
-      setSubmittingReturn(false);
+    } else {
+      toast.error(res.data.message || 'Return failed');
     }
-  };
+  } catch (err) {
+    console.error(err);
+    toast.error('Failed to submit return request');
+  } finally {
+    setSubmittingReturn(false);
+  }
+};
+
 
   return (
     <div className="order-list">
@@ -166,12 +182,11 @@ const OrderDelivered = ({ orders, handleProductClick, slugify, viewOrderDetails 
               Return Product
             </button>
             <button
-              className="btn-outline"
-              // onClick={() => viewOrderDetails(order)}
-  onClick={() => navigate('/myaccount/orders')}        
-      >
-              View Details
-            </button>
+  className="btn-outline"
+  onClick={() => viewOrderDetails(order)}
+>
+  View Details
+</button>
           </div>
         </div>
       ))}

@@ -13,6 +13,14 @@ const ProcessingOrders = ({
 }) => {
   const [buyingAgainOrderId, setBuyingAgainOrderId] = useState(null);
   const { addToCart } = useCart();
+  const PROCESSING_STATUSES = [
+  'pending',
+  'processing',
+  'on-hold',
+  'cod',
+  'confirmed',
+];
+
 
   const handleBuyAgain = async (lineItems, orderId) => {
     try {
@@ -46,7 +54,7 @@ const ProcessingOrders = ({
     <div className="processing-orders" style={{ maxWidth: 800, margin: '0 auto' }}>
       <ToastContainer position="bottom-center" autoClose={2000} hideProgressBar />
       {orders
-        .filter((o) => o.status === 'processing')
+        .filter((o) => PROCESSING_STATUSES.includes(o.status))
         .map((order) => (
           <div
             key={order.id}

@@ -91,8 +91,8 @@ export default function CheckoutRight({ cartItems, formData, createOrder, clearC
   }, 0);
 
   const subtotal = Math.max(0, itemsTotal - discount - coinDiscount);
-  const totalWithDelivery = subtotal;
-  const amountToSend = Math.max(totalWithDelivery, 0.01);
+const totalWithDelivery = subtotal;
+const amountToSend = Number(totalWithDelivery.toFixed(2));
   const hasCartItems = cartItems.some((item) => (parseInt(item.quantity, 10) || 0) > 0);
   const isAddressFormOpen = !!(showForm || formData?.addressModalOpen);
 
@@ -142,8 +142,27 @@ export default function CheckoutRight({ cartItems, formData, createOrder, clearC
     setIsPlacingOrder(true);
 
     try {
-      const id = orderId || (await createOrder());
-      await captureOrderItems(id, cartItems, shippingOrBilling);
+   let id = orderId;
+
+if (!id) {
+  const res = await createOrder();
+
+  // handle all possible shapes
+  if (typeof res === 'number') {
+    id = res;
+  } else if (res?.id) {
+    id = res.id;
+  } else if (res?.order_id) {
+    id = res.order_id;
+  } else {
+    console.error("createOrder() returned:", res);
+    throw new Error("Missing order");
+  }
+}
+
+const orderIdValue = id;
+
+await captureOrderItems(orderIdValue, cartItems, shippingOrBilling);
 
       // COD - Show order confirmed popup instead of redirecting
       if (formData.paymentMethod === 'cod') {
@@ -154,6 +173,43 @@ export default function CheckoutRight({ cartItems, formData, createOrder, clearC
         setIsPlacingOrder(false);
         return;
       }
+if (formData.paymentMethod === 'wallet') {
+
+  // if (Number(formData.walletBalance) < Number(amountToSend)) {
+  //   throw new Error(
+  //     `Insufficient wallet balance. Required AED ${amountToSend.toFixed(2)}`
+  //   );
+  // }
+
+  const res = await fetch(
+    "https://db.store1920.com/wp-json/custom/v3/pay-with-wallet",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+  order_id: orderIdValue,
+}),
+    }
+  );
+
+  const data = await res.json();
+
+console.log("✅ Wallet Payment Response =>", data);
+  if (!res.ok || !data.success) {
+    throw new Error(data.message || "Wallet payment failed");
+  }
+
+  clearCart();
+ window.location.href = `/order-success?order_id=${orderIdValue}`;
+  return;
+}
+
+
+
+
+
 
       // ✅ STRIPE FLOW
       if (formData.paymentMethod === 'stripe') {
@@ -317,6 +373,7 @@ export default function CheckoutRight({ cartItems, formData, createOrder, clearC
     }
   };
 
+  
   // -----------------------------
   // UI helpers
   // -----------------------------
@@ -486,7 +543,7 @@ export default function CheckoutRight({ cartItems, formData, createOrder, clearC
     const hasMethod = Boolean(method);
     const label = hasMethod ? (labels[method] || method) : 'Order';
   const rawLogo = hasMethod ? (defaultLogos[method] || formData.paymentMethodLogo || null) : null;
-  const shouldHideLogo = method === 'cod' || method === 'card';
+  const shouldHideLogo = method === 'cod' || method === 'card ' || method === 'wallet';
   const logoUrl = shouldHideLogo ? null : rawLogo;
     const baseText = isPlacingOrder
       ? hasMethod

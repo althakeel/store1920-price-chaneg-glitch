@@ -27,6 +27,8 @@ import CashPayIcon from '../../assets/images/Footer icons/13.webp';
 import MasterCardIcon from '../../assets/images/Footer icons/16.webp';
 import VisaCardIcon from '../../assets/images/Footer icons/17.webp';
 import PayPalIcon from '../../assets/images/Footer icons/18.webp';
+import axios from 'axios';
+import { useAuth } from '../../contexts/AuthContext';
 
 // Safely import staticProducts with fallback
 let staticProducts = [];
@@ -50,6 +52,12 @@ const PaymentMethods = ({ selectedMethod, onMethodSelect, subtotal, cartItems = 
   const [showPaymentConfirmation, setShowPaymentConfirmation] = useState(false);
   const [confirmationMethod, setConfirmationMethod] = useState(null);
   const [isConfirming, setIsConfirming] = useState(false);
+  const [walletBalance, setWalletBalance] = React.useState(null);
+  const [walletLoading, setWalletLoading] = React.useState(true);
+  const { user } = useAuth();
+  console.log('Auth user object:', user);
+console.log('Auth user ID:', user?.id);
+
 
   // Set Tabby as default if nothing is selected and subtotal > 0
   useEffect(() => {
@@ -112,6 +120,9 @@ const PaymentMethods = ({ selectedMethod, onMethodSelect, subtotal, cartItems = 
     cartItems.some(item => !staticProductIds.includes(item.id));
 
   const amount = Number(subtotal) || 0;
+  const canUseWallet =
+  Number(walletBalance || 0) >= amount &&
+  amount > 0;
   const tabbyInstallment = (amount / 4).toFixed(2);
 
   useEffect(() => {
@@ -178,6 +189,42 @@ const PaymentMethods = ({ selectedMethod, onMethodSelect, subtotal, cartItems = 
       loadTamaraWidget();
     }
   }, [subtotal]);
+
+
+useEffect(() => {
+  console.log('Wallet fetch triggered');
+  console.log('User ID used for wallet:', user?.id);
+  if (!user?.id) {
+    setWalletBalance(0);
+    setWalletLoading(false);
+    return;
+  }
+console.log("Fetching wallet for user:", user.id);
+  axios
+    .get('https://db.store1920.com/wp-json/custom/v3/wallet', {
+      params: {
+        user_id: user.id // 🔑 SAME AS Wallet.jsx
+      }
+    })
+    .then(res => {
+      if (res.data.success) {
+        setWalletBalance(Number(res.data.balance || 0));
+      } else {
+        setWalletBalance(0);
+      }
+    })
+    .catch(() => setWalletBalance(0))
+    .finally(() => setWalletLoading(false));
+
+}, [user]);
+
+
+console.log('Wallet balance:', walletBalance);
+console.log('Can use wallet:', canUseWallet);
+console.log('Wallet loading:', walletLoading);
+
+
+
 
   return (
     <div className="pm-wrapper">
@@ -346,7 +393,40 @@ const PaymentMethods = ({ selectedMethod, onMethodSelect, subtotal, cartItems = 
               </span>
             </label>
           </div>
+          
         )}
+        {/* Wallet Payment */}
+    {!walletLoading && (
+
+    <div className="payment-method-item" style={{ opacity: canUseWallet ? 1 : 0.5 }}>
+    <input
+      type="radio"
+      id="wallet"
+      name="payment-method"
+      disabled={!canUseWallet}
+      checked={selectedMethod === 'wallet'}
+      onChange={() =>
+        onMethodSelect('wallet', 'Wallet Balance', { icon: 'wallet' })
+      }
+    />
+    <label htmlFor="wallet" className="payment-method-label">
+      <div className="payment-method-content">
+        <strong>Wallet Balance</strong>
+        <div style={{ fontSize: 13, color: '#555' }}>
+          Available: AED {walletBalance}
+        </div>
+
+        {!canUseWallet && (
+          <div style={{ fontSize: 12, color: '#d9534f' }}>
+            Insufficient wallet balance
+          </div>
+        )}
+      </div>
+    </label>
+  </div>
+)}
+
+
       </div>
     </div>
   );
