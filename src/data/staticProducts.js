@@ -1350,38 +1350,38 @@ const staticProducts = [
 
     bundles: [
       {
-        type: "Buy 1",
+        type: "Single Battery",
         id: 523404,
         name: "Cordless Leaf Blower ",
-        label: "Buy 1 for Only 69.9 AED",
+        label: "Single Battery for Only 69.9 AED",
         discount: 0,
         price: 59.9,
         originalPrice: 189,
         image: Product96,
       },
       {
-        type: "Bundle of 2",
+        type: "Double Battery",
         id: 523417,
         name: "Cordless Leaf Blower ",
-        label: "Buy 2 & Get 15% Off",
+        label: "Double Battery & Get 15% Off",
         discount: 15,
-        price: 107.90, // 15% off on 2 items
-        originalPrice: 378, // 139.80 AED
+        price: 69.90, // 15% off on 2 items
+        originalPrice: 139, // 139.80 AED
         note: "Perfect for you & a friend",
         mostPopular: true,
         image: Product99,
       },
-      {
-        type: "Bundle of 3",
-        id: 523418,
-        name: "Cordless Leaf Blower",
-        label: "Buy 3 & Get 25% Off",
-        discount: 18,
-        price: 146.90, // 25% off on 3 items
-        originalPrice: 567, // 269.70 AED
-        note: "Best Value",
-        image: Product93,
-      },
+      // {
+      //   type: "Bundle of 3",
+      //   id: 523418,
+      //   name: "Cordless Leaf Blower",
+      //   label: "Buy 3 & Get 25% Off",
+      //   discount: 18,
+      //   price: 146.90, // 25% off on 3 items
+      //   originalPrice: 567, // 269.70 AED
+      //   note: "Best Value",
+      //   image: Product93,
+      // },
     ],
     BundleTitle: "BUNDLE AND SAVE MORE!",
 
