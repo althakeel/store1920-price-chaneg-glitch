@@ -4,7 +4,7 @@
 // import Logo4 from '../assets/images/theme/Purple 2@6x.png';
 // import Logo5 from '../assets/images/theme/banner/HAlloween Logo V1.png';
 // import Logo6 from '../assets/images/theme/Asset 1@4x.png';
-import Logo8 from "../assets/images/theme/theme6/Main-02-02.webp";
+import Logo8 from "../assets/images/theme/theme6/Main-fab-09.webp";
 // import Logo9 from "../assets/images/theme/theme6/main-23-25.webp";
 // import banner1 from '../assets/images/theme/banner/Banners Yellow.webp';
 // import banner2 from '../assets/images/theme/banner/Banners-Sky-blue.webp';
@@ -12,17 +12,17 @@ import Logo8 from "../assets/images/theme/theme6/Main-02-02.webp";
 // import banner4 from '../assets/images/theme/banner/Banners-purple-2.webp';
 // import banner5 from '../assets/images/theme/banner/Banners Halloween 2.webp';
 // import banner6 from '../assets/images/theme/banner/Bannersmorron.webp';
-import Banner10 from "../assets/images/theme/theme6/Main-02-02.webp";
+import Banner10 from "../assets/images/theme/theme6/Main-fab-09.webp";
 
 export const themes = {
   1: {
     logo: Logo8,
-    navbarBg: "#1F5661",
+    navbarBg: "#420608",
     bannerKey: Banner10,
-    bannerBg: "#1F5661",
+    bannerBg: "#420608",
     lightningBanner: {
-      backgroundColor: "#1F5661",
-      textColor: "#1F5661",
+      backgroundColor: "#420608",
+      textColor: "#420608",
     },
   },
   // 3: {
